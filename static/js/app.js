@@ -14,7 +14,7 @@ const marginRight = document.getElementById('marginRight')
 const marginBottom = document.getElementById('marginBottom')
 const marginLeft = document.getElementById('marginLeft')
 const dynamicStyle = document.getElementById('dynamicStyle')
-const printBorders = document.getElementById('printBorders')
+const borderStyle = document.getElementById('borderStyle')
 
 let labels = []
 
@@ -110,12 +110,39 @@ function generateSheet() {
     span.className = 'label-text'
     span.textContent = data.text || ''
     item.appendChild(span)
+    // add crossmark corner markers when selected
+    const bsVal = borderStyle ? borderStyle.value : (document.documentElement.getAttribute('data-border-style') || 'none')
+    if (bsVal === 'crossmarks'){
+      item.style.position = 'relative'
+      const size = 6
+      const thickness = 0.45
+      const addMark = (opts)=>{
+        const m = document.createElement('div')
+        m.className = 'crossmark'
+        m.style.width = `${size}mm`
+        m.style.height = `${thickness}mm`
+        m.style.background = '#000'
+        m.style.position = 'absolute'
+        if (opts.top) m.style.top = opts.top
+        if (opts.left) m.style.left = opts.left
+        if (opts.right) m.style.right = opts.right
+        if (opts.bottom) m.style.bottom = opts.bottom
+        if (opts.rot) m.style.transform = 'rotate(90deg)'
+        item.appendChild(m)
+      }
+      addMark({top:'0.6mm',left:'0.6mm',rot:false})
+      addMark({top:'0.6mm',left:'0.6mm',rot:true})
+      addMark({top:'0.6mm',right:'0.6mm',rot:false})
+      addMark({top:'0.6mm',right:'0.6mm',rot:true})
+      addMark({bottom:'0.6mm',left:'0.6mm',rot:false})
+      addMark({bottom:'0.6mm',left:'0.6mm',rot:true})
+      addMark({bottom:'0.6mm',right:'0.6mm',rot:false})
+      addMark({bottom:'0.6mm',right:'0.6mm',rot:true})
+    }
     sheet.appendChild(item)
   }
-
-  // ensure print-borders class matches checkbox at generation time (helps print-preview)
-  if (printBorders && printBorders.checked) document.documentElement.classList.add('print-borders')
-  else document.documentElement.classList.remove('print-borders')
+  // reflect chosen border style onto root element so print CSS picks it up
+  if (borderStyle) document.documentElement.setAttribute('data-border-style', borderStyle.value)
 }
 
 function applyPageSettings(){
@@ -161,10 +188,11 @@ marginRight.addEventListener('input', applyPageSettings)
 marginBottom.addEventListener('input', applyPageSettings)
 marginLeft.addEventListener('input', applyPageSettings)
 
-if (printBorders){
-  printBorders.addEventListener('change', ()=>{
-    if (printBorders.checked) document.documentElement.classList.add('print-borders')
-    else document.documentElement.classList.remove('print-borders')
+// initialize and watch border style select (reflect on root element for print CSS)
+if (borderStyle){
+  document.documentElement.setAttribute('data-border-style', borderStyle.value)
+  borderStyle.addEventListener('change', ()=>{
+    document.documentElement.setAttribute('data-border-style', borderStyle.value)
   })
 }
 

@@ -34,6 +34,7 @@ header h1{margin:0}
 .label-img{max-width:100%;max-height:60%;object-fit:contain}
 .label-text{margin-top:6px;font-weight:600}
 .actions button{padding:8px 12px}
+.crossmark{pointer-events:none}
 
 @media print{
   html,body{margin:0;padding:0;background:#fff}
@@ -51,10 +52,51 @@ header h1{margin:0}
     box-shadow:none;
     gap:0;
   }
+    /* default: no printed borders unless a data attribute requests one */
+    html:not([data-border-style]) .label,
+    html[data-border-style="none"] .label {
+      border:none !important;
+      outline:none !important;
+      box-shadow:none !important;
+      margin:0 !important;
+      page-break-inside:avoid;
+    }
 
-  /* labels only: default to hiding borders in print, but allow enabling via `print-borders` class on <html> */
-  html:not(.print-borders) .label{border:none !important;box-shadow:none;margin:0;page-break-inside:avoid}
-  html.print-borders .label{border:1px solid #000 !important;box-shadow:none;margin:0;page-break-inside:avoid}
+    html[data-border-style="dotted"] .label {
+      border:0.45mm dotted #000 !important;
+      outline:none !important;
+      box-shadow:none !important;
+      margin:0 !important;
+      page-break-inside:avoid;
+    }
+
+    html[data-border-style="dashed"] .label {
+      border:0.45mm dashed #000 !important;
+      outline:none !important;
+      box-shadow:none !important;
+      margin:0 !important;
+      page-break-inside:avoid;
+    }
+
+    html[data-border-style="solid"] .label {
+      border:0.45mm solid #000 !important;
+      outline:none !important;
+      box-shadow:none !important;
+      margin:0 !important;
+      page-break-inside:avoid;
+    }
+
+    html[data-border-style="crossmarks"] .label {
+      border:none !important;
+      position:relative !important;
+      box-shadow:none !important;
+      margin:0 !important;
+      page-break-inside:avoid;
+    }
+
+  /* ensure the page wrapper doesn't break across pages and remove overflow */
+  .page{page-break-after:avoid;page-break-inside:avoid}
+  html,body{overflow:visible}
 
   /* remove preview heading from print but keep label text visible */
   main > h2 { display: none !important; }
