@@ -1,0 +1,61 @@
+:root{
+  --label-gap:6mm;
+  --page-width:210mm;
+  --page-height:297mm;
+  --margin-top:10mm;
+  --margin-right:10mm;
+  --margin-bottom:10mm;
+  --margin-left:10mm;
+  --label-padding:2mm;
+}
+body{font-family:system-ui,Segoe UI,Arial,sans-serif;padding:16px;color:#222;background:#f7f7f7}
+.app{max-width:1100px;margin:0 auto;background:#fff;padding:16px;border-radius:6px;box-shadow:0 2px 8px rgba(0,0,0,0.06)}
+header h1{margin:0}
+.controls{display:flex;gap:16px;flex-wrap:wrap;margin:12px 0}
+.controls label, .add-label, .actions{display:flex;align-items:center;gap:8px}
+.add-label input[type=file]{width:180px}
+.label-list{min-width:220px}
+.label-list ul{list-style:none;padding:0;margin:4px 0}
+.label-item{display:flex;gap:8px;align-items:center;padding:6px 0}
+.thumb{width:36px;height:36px;object-fit:cover;border-radius:4px;margin-right:6px}
+.sheet{border:1px dashed #ccc;padding:8px;margin-top:12px;display:grid;gap:var(--label-gap);background:#fff}
+.page{display:flex;justify-content:center;margin-top:12px}
+.page .sheet{
+  width:var(--page-width);
+  height:var(--page-height);
+  padding:var(--margin-top) var(--margin-right) var(--margin-bottom) var(--margin-left);
+  box-sizing:border-box;
+  display:grid;
+  gap:var(--label-gap);
+  background: #fff;
+  border:1px solid rgba(0,0,0,0.06);
+}
+.label{border:1px solid #ddd;padding:var(--label-padding);box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.label-img{max-width:100%;max-height:60%;object-fit:contain}
+.label-text{margin-top:6px;font-weight:600}
+.actions button{padding:8px 12px}
+
+@media print{
+  html,body{margin:0;padding:0;background:#fff}
+  /* hide UI chrome but keep the page wrapper */
+  .controls, header, .label-list, .actions{display:none !important}
+
+  /* keep the sheet sized to the page with its margins so label sizes match exactly */
+  .page{display:block;margin:0}
+  .page .sheet{
+    width:var(--page-width) !important;
+    height:var(--page-height) !important;
+    padding:var(--margin-top) var(--margin-right) var(--margin-bottom) var(--margin-left) !important;
+    box-sizing:border-box;
+    border:none;
+    box-shadow:none;
+    gap:0;
+  }
+
+  /* labels only: default to hiding borders in print, but allow enabling via `print-borders` class on <html> */
+  html:not(.print-borders) .label{border:none !important;box-shadow:none;margin:0;page-break-inside:avoid}
+  html.print-borders .label{border:1px solid #000 !important;box-shadow:none;margin:0;page-break-inside:avoid}
+
+  /* remove preview heading from print but keep label text visible */
+  main > h2 { display: none !important; }
+}

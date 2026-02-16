@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Label Creator (Browser-only)</title>
+    <link rel="stylesheet" href="./static/css/style.css">
+  </head>
+  <body>
+    <div class="app">
+      <header>
+        <h1>Label Creator</h1>
+        <p>Create printable label sheets in your browser (no server required).</p>
+      </header>
+
+      <section class="controls">
+        <label>
+          Preset layout:
+          <select id="layoutSelect">
+            <option value="2x4" data-cols="2" data-rows="4">2 × 4</option>
+            <option value="3x8" data-cols="3" data-rows="8" selected>3 × 8</option>
+            <option value="4x7" data-cols="4" data-rows="7">4 × 7</option>
+          </select>
+        </label>
+
+        <label>
+          Page size:
+          <select id="pageSize">
+            <option value="A4" selected>A4 (210 × 297 mm)</option>
+            <option value="Letter">Letter (8.5 × 11 in)</option>
+          </select>
+        </label>
+
+        <label>
+          Margins:
+          <select id="marginPreset">
+            <option value="standard" data-m="10">Standard (10mm)</option>
+            <option value="narrow" data-m="5">Narrow (5mm)</option>
+            <option value="wide" data-m="20">Wide (20mm)</option>
+            <option value="none" data-m="0">None (0mm)</option>
+            <option value="custom">Custom</option>
+          </select>
+        </label>
+
+        <div id="customMargins" style="display:none;align-items:center;gap:6px;">
+          <input id="marginTop" placeholder="top mm" size="4">
+          <input id="marginRight" placeholder="right mm" size="4">
+          <input id="marginBottom" placeholder="bottom mm" size="4">
+          <input id="marginLeft" placeholder="left mm" size="4">
+        </div>
+
+        <label>
+          <input type="checkbox" id="printBorders">
+          Print label borders
+        </label>
+
+        <div class="add-label">
+          <input id="labelText" placeholder="Child name or label text">
+          <input id="labelImage" type="file" accept="image/*">
+          <button id="addLabelBtn">Add Label</button>
+        </div>
+
+        <div class="label-list">
+          <h3>Labels</h3>
+          <ul id="labels"></ul>
+        </div>
+
+        <div class="actions">
+          <button id="generateBtn">Generate Sheet</button>
+          <button id="printBtn">Print</button>
+        </div>
+      </section>
+
+      <main>
+        <h2>Preview / Sheet</h2>
+        <div class="page">
+          <div id="sheet" class="sheet"></div>
+        </div>
+      </main>
+    
+    <style id="dynamicStyle"></style>
+    </div>
+
+    <script src="./static/js/app.js"></script>
+  </body>
+</html>
