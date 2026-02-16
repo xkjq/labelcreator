@@ -3,6 +3,8 @@ const addLabelBtn = document.getElementById('addLabelBtn')
 const labelText = document.getElementById('labelText')
 const labelImage = document.getElementById('labelImage')
 const layoutSelect = document.getElementById('layoutSelect')
+const colsInput = document.getElementById('colsInput')
+const rowsInput = document.getElementById('rowsInput')
 const generateBtn = document.getElementById('generateBtn')
 const printBtn = document.getElementById('printBtn')
 const sheet = document.getElementById('sheet')
@@ -15,6 +17,10 @@ const marginBottom = document.getElementById('marginBottom')
 const marginLeft = document.getElementById('marginLeft')
 const dynamicStyle = document.getElementById('dynamicStyle')
 const borderStyle = document.getElementById('borderStyle')
+const labelHeightMode = document.getElementById('labelHeightMode')
+const labelHeightCustom = document.getElementById('labelHeightCustom')
+const fontSizeRange = document.getElementById('fontSizeRange')
+const fontSizeLabel = document.getElementById('fontSizeLabel')
 
 let labels = []
 
@@ -70,8 +76,9 @@ addLabelBtn.addEventListener('click', () => {
 })
 
 function generateSheet() {
-  const cols = Number(layoutSelect.selectedOptions[0].dataset.cols) || 3
-  const rows = Number(layoutSelect.selectedOptions[0].dataset.rows) || 8
+  // read columns/rows from inputs (allow presets via select to populate them)
+  const cols = Math.max(1, Number(colsInput.value) || Number(layoutSelect.selectedOptions[0].dataset.cols) || 3)
+  let rows = Math.max(1, Number(rowsInput.value) || Number(layoutSelect.selectedOptions[0].dataset.rows) || 8)
   const count = cols * rows
   // compute physical dimensions in mm and set grid to exact sizes so print matches
   const getMm = (v) => Number(String(v).trim().replace('mm',''))
@@ -85,8 +92,23 @@ function generateSheet() {
 
   const contentW = pageW - mLeft - mRight
   const contentH = pageH - mTop - mBottom
-  const labelW = contentW / cols
-  const labelH = contentH / rows
+
+  // label height mode: standard uses rows input; thin uses fixed small height and recomputes rows; custom uses provided mm height
+  let labelW = contentW / cols
+  let labelH
+  const lhMode = labelHeightMode ? labelHeightMode.value : 'standard'
+  if (lhMode === 'thin'){
+    // thin single-line height ~12mm
+    const thinH = 12
+    rows = Math.floor(contentH / thinH) || 1
+    labelH = thinH
+    // update rows input so user sees actual used rows
+    rowsInput.value = rows
+  } else if (lhMode === 'custom' && labelHeightCustom && labelHeightCustom.value){
+    labelH = Number(labelHeightCustom.value) || (contentH / rows)
+  } else {
+    labelH = contentH / rows
+  }
 
   sheet.innerHTML = ''
   // set explicit grid sizes using mm units
@@ -180,6 +202,29 @@ function applyPageSettings(){
     customMargins.style.display = 'flex'
   }
 }
+
+// sync layout select -> cols/rows inputs
+layoutSelect.addEventListener('change', ()=>{
+  const opt = layoutSelect.selectedOptions[0]
+  colsInput.value = opt.dataset.cols || colsInput.value
+  rowsInput.value = opt.dataset.rows || rowsInput.value
+})
+
+// label height UI
+labelHeightMode.addEventListener('change', ()=>{
+  if (labelHeightMode.value === 'custom') labelHeightCustom.style.display = 'inline-block'
+  else labelHeightCustom.style.display = 'none'
+})
+
+// font size control
+fontSizeRange.addEventListener('input', ()=>{
+  const v = fontSizeRange.value
+  fontSizeLabel.textContent = `${v}pt`
+  document.documentElement.style.setProperty('--label-font-size', `${v}pt`)
+})
+
+// set default font-size var
+document.documentElement.style.setProperty('--label-font-size','12pt')
 
 pageSize.addEventListener('change', applyPageSettings)
 marginPreset.addEventListener('change', applyPageSettings)
