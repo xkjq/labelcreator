@@ -86,6 +86,20 @@
           <input id="fontSizeRange" type="range" min="6" max="24" value="12">
           <span id="fontSizeLabel">12pt</span>
         </label>
+        <label>
+          Image position:
+          <select id="imagePosition">
+            <option value="center" selected>Center</option>
+            <option value="top">Top</option>
+            <option value="bottom">Bottom</option>
+            <option value="left">Left</option>
+            <option value="right">Right</option>
+            <option value="top-left">Top-left</option>
+            <option value="top-right">Top-right</option>
+            <option value="bottom-left">Bottom-left</option>
+            <option value="bottom-right">Bottom-right</option>
+          </select>
+        </label>
 
         <div class="add-label">
           <input id="labelText" placeholder="Child name or label text">
@@ -114,6 +128,44 @@
     <style id="dynamicStyle"></style>
     </div>
 
+    <!-- Edit modal -->
+    <div id="editModal" class="modal" aria-hidden="true">
+      <div class="modal-content">
+        <header>
+          <h3>Edit Label</h3>
+        </header>
+        <div class="modal-body">
+          <label>Text:
+            <input id="modalLabelText">
+          </label>
+          <label>Font size:
+            <input id="modalFontSize" type="number" min="6" max="48" value="12"> pt
+          </label>
+          <label>Image position:
+            <select id="modalImagePosition">
+              <option value="center">Center</option>
+              <option value="top">Top</option>
+              <option value="bottom">Bottom</option>
+              <option value="left">Left</option>
+              <option value="right">Right</option>
+              <option value="top-left">Top-left</option>
+              <option value="top-right">Top-right</option>
+              <option value="bottom-left">Bottom-left</option>
+              <option value="bottom-right">Bottom-right</option>
+            </select>
+          </label>
+
+          <label>Images:
+            <input id="modalImageInput" type="file" accept="image/*" multiple>
+          </label>
+          <div id="modalImages" class="modal-images"></div>
+        </div>
+        <footer>
+          <button id="modalSave">Save</button>
+          <button id="modalCancel">Cancel</button>
+        </footer>
+      </div>
+    </div>
     <script src="./static/js/app.js"></script>
   </body>
 </html>

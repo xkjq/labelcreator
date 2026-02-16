@@ -1,3 +1,4 @@
+// Label Creator client script (clean implementation)
 const labelsList = document.getElementById('labels')
 const addLabelBtn = document.getElementById('addLabelBtn')
 const labelText = document.getElementById('labelText')
@@ -17,92 +18,113 @@ const marginBottom = document.getElementById('marginBottom')
 const marginLeft = document.getElementById('marginLeft')
 const dynamicStyle = document.getElementById('dynamicStyle')
 const borderStyle = document.getElementById('borderStyle')
+const imagePosition = document.getElementById('imagePosition')
 const labelHeightMode = document.getElementById('labelHeightMode')
 const labelHeightCustom = document.getElementById('labelHeightCustom')
 const fontSizeRange = document.getElementById('fontSizeRange')
 const fontSizeLabel = document.getElementById('fontSizeLabel')
 
-let labels = []
+// modal elements
+const editModal = document.getElementById('editModal')
+const modalLabelText = document.getElementById('modalLabelText')
+const modalFontSize = document.getElementById('modalFontSize')
+const modalImagePosition = document.getElementById('modalImagePosition')
+const modalImageInput = document.getElementById('modalImageInput')
+const modalImages = document.getElementById('modalImages')
+const modalSave = document.getElementById('modalSave')
+const modalCancel = document.getElementById('modalCancel')
+let currentEditIndex = null
+let modalImgs = []
 
-function renderLabels() {
+let labels = [] // each entry: { text, imgs:[], fontSize, imagePosition }
+
+function renderLabels(){
   labelsList.innerHTML = ''
-  labels.forEach((l, i) => {
+  labels.forEach((l,i)=>{
     const li = document.createElement('li')
     li.className = 'label-item'
-    const textSpan = document.createElement('span')
-    textSpan.textContent = l.text || '(no text)'
-    li.appendChild(textSpan)
-    if (l.img) {
-      const img = document.createElement('img')
-      img.src = l.img
-      img.className = 'thumb'
-      li.prepend(img)
+    // thumbnail
+    if (l.imgs && l.imgs.length){
+      const t = document.createElement('img')
+      t.src = l.imgs[0]
+      t.className = 'thumb'
+      li.appendChild(t)
     }
-    const removeBtn = document.createElement('button')
-    removeBtn.textContent = 'Remove'
-    removeBtn.dataset.i = i
-    removeBtn.className = 'remove'
-    li.appendChild(removeBtn)
+    const text = document.createElement('span')
+    text.textContent = l.text || '(no text)'
+    li.appendChild(text)
+    const edit = document.createElement('button')
+    edit.textContent = 'Edit'
+    edit.className = 'edit'
+    edit.dataset.i = i
+    li.appendChild(edit)
+    const remove = document.createElement('button')
+    remove.textContent = 'Remove'
+    remove.className = 'remove'
+    remove.dataset.i = i
+    li.appendChild(remove)
     labelsList.appendChild(li)
   })
 }
 
-labelsList.addEventListener('click', (e) => {
-  if (e.target.classList.contains('remove')) {
+labelsList.addEventListener('click',(e)=>{
+  if (e.target.classList.contains('remove')){
     const i = Number(e.target.dataset.i)
-    labels.splice(i, 1)
+    labels.splice(i,1)
     renderLabels()
+  }
+  if (e.target.classList.contains('edit')){
+    const i = Number(e.target.dataset.i)
+    openEditModal(i)
   }
 })
 
-addLabelBtn.addEventListener('click', () => {
+addLabelBtn.addEventListener('click', ()=>{
   const text = labelText.value.trim()
   const file = labelImage.files[0]
   if (!text && !file) return alert('Add text or select an image')
-  if (file) {
-    const reader = new FileReader()
-    reader.onload = () => {
-      labels.push({ text, img: reader.result })
+  const defaultFont = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--label-font-size')) || 12
+  const pos = imagePosition ? imagePosition.value : 'center'
+  if (file){
+    const r = new FileReader()
+    r.onload = ()=>{
+      labels.push({ text, imgs:[r.result], fontSize: defaultFont, imagePosition: pos })
       renderLabels()
       labelText.value = ''
       labelImage.value = ''
     }
-    reader.readAsDataURL(file)
+    r.readAsDataURL(file)
   } else {
-    labels.push({ text, img: null })
+    labels.push({ text, imgs:[], fontSize: defaultFont, imagePosition: pos })
     renderLabels()
     labelText.value = ''
   }
 })
 
-function generateSheet() {
-  // read columns/rows from inputs (allow presets via select to populate them)
+function mm(v){ return Number(String(v).trim().replace('mm','')) }
+
+function generateSheet(){
   const cols = Math.max(1, Number(colsInput.value) || Number(layoutSelect.selectedOptions[0].dataset.cols) || 3)
   let rows = Math.max(1, Number(rowsInput.value) || Number(layoutSelect.selectedOptions[0].dataset.rows) || 8)
-  const count = cols * rows
-  // compute physical dimensions in mm and set grid to exact sizes so print matches
-  const getMm = (v) => Number(String(v).trim().replace('mm',''))
+  const countEstimate = cols * rows
   const root = getComputedStyle(document.documentElement)
-  const pageW = getMm(root.getPropertyValue('--page-width') || '210mm')
-  const pageH = getMm(root.getPropertyValue('--page-height') || '297mm')
-  const mTop = getMm(root.getPropertyValue('--margin-top') || '10mm')
-  const mRight = getMm(root.getPropertyValue('--margin-right') || '10mm')
-  const mBottom = getMm(root.getPropertyValue('--margin-bottom') || '10mm')
-  const mLeft = getMm(root.getPropertyValue('--margin-left') || '10mm')
-
+  const pageW = mm(root.getPropertyValue('--page-width') || '210mm')
+  const pageH = mm(root.getPropertyValue('--page-height') || '297mm')
+  const mTop = mm(root.getPropertyValue('--margin-top') || '10mm')
+  const mRight = mm(root.getPropertyValue('--margin-right') || '10mm')
+  const mBottom = mm(root.getPropertyValue('--margin-bottom') || '10mm')
+  const mLeft = mm(root.getPropertyValue('--margin-left') || '10mm')
   const contentW = pageW - mLeft - mRight
   const contentH = pageH - mTop - mBottom
 
-  // label height mode: standard uses rows input; thin uses fixed small height and recomputes rows; custom uses provided mm height
+  // determine label sizes
   let labelW = contentW / cols
   let labelH
   const lhMode = labelHeightMode ? labelHeightMode.value : 'standard'
   if (lhMode === 'thin'){
-    // thin single-line height ~12mm
     const thinH = 12
-    rows = Math.floor(contentH / thinH) || 1
+    rows = Math.max(1, Math.floor(contentH / thinH))
     labelH = thinH
-    // update rows input so user sees actual used rows
     rowsInput.value = rows
   } else if (lhMode === 'custom' && labelHeightCustom && labelHeightCustom.value){
     labelH = Number(labelHeightCustom.value) || (contentH / rows)
@@ -110,39 +132,117 @@ function generateSheet() {
     labelH = contentH / rows
   }
 
+  const count = cols * rows
   sheet.innerHTML = ''
-  // set explicit grid sizes using mm units
   sheet.style.gridTemplateColumns = `repeat(${cols}, ${labelW}mm)`
   sheet.style.gridTemplateRows = `repeat(${rows}, ${labelH}mm)`
 
-  for (let i = 0; i < count; i++) {
+  for (let i=0;i<count;i++){
     const item = document.createElement('div')
     item.className = 'label'
-    // Ensure each label box has exact physical size as a fallback
     item.style.width = `${labelW}mm`
     item.style.height = `${labelH}mm`
-    const data = labels.length ? labels[i % labels.length] : { text: '' }
-    if (data.img) {
-      const img = document.createElement('img')
-      img.src = data.img
-      img.className = 'label-img'
-      item.appendChild(img)
+    // get label data
+    const data = labels.length ? labels[i % labels.length] : { text:'', imgs:[], fontSize: null, imagePosition: null }
+
+    // layout based on per-label imagePosition (fallback to global)
+    const imgPos = (data.imagePosition) ? data.imagePosition : (imagePosition ? imagePosition.value : 'center')
+    // reset row class
+    item.classList.remove('row')
+    if (['left','right','top-left','top-right','bottom-left','bottom-right'].includes(imgPos)) item.classList.add('row')
+    if (imgPos === 'top'){
+      item.style.flexDirection = 'column'
+      item.style.justifyContent = 'flex-start'
+      item.style.alignItems = 'center'
+    } else if (imgPos === 'bottom'){
+      item.style.flexDirection = 'column'
+      item.style.justifyContent = 'flex-end'
+      item.style.alignItems = 'center'
+    } else if (imgPos === 'left'){
+      item.style.flexDirection = 'row'
+      item.style.justifyContent = 'flex-start'
+      item.style.alignItems = 'center'
+    } else if (imgPos === 'right'){
+      item.style.flexDirection = 'row'
+      item.style.justifyContent = 'flex-end'
+      item.style.alignItems = 'center'
+    } else if (imgPos === 'top-left'){
+      item.style.flexDirection = 'row'
+      item.style.justifyContent = 'flex-start'
+      item.style.alignItems = 'flex-start'
+    } else if (imgPos === 'top-right'){
+      item.style.flexDirection = 'row'
+      item.style.justifyContent = 'flex-end'
+      item.style.alignItems = 'flex-start'
+    } else if (imgPos === 'bottom-left'){
+      item.style.flexDirection = 'row'
+      item.style.justifyContent = 'flex-start'
+      item.style.alignItems = 'flex-end'
+    } else if (imgPos === 'bottom-right'){
+      item.style.flexDirection = 'row'
+      item.style.justifyContent = 'flex-end'
+      item.style.alignItems = 'flex-end'
+    } else {
+      item.style.flexDirection = 'column'
+      item.style.justifyContent = 'center'
+      item.style.alignItems = 'center'
     }
+
+    // create text element
     const span = document.createElement('div')
     span.className = 'label-text'
     span.textContent = data.text || ''
-    item.appendChild(span)
-    // add crossmark corner markers when selected
+    // apply per-label font size if defined, otherwise use root var
+    if (data.fontSize) span.style.fontSize = `${data.fontSize}pt`
+
+    // append images and text in an order that reflects the image position
+    const isRow = item.style.flexDirection === 'row'
+    const appendImages = ()=>{
+      if (data.imgs && data.imgs.length){
+        data.imgs.forEach(src=>{
+          const img = document.createElement('img')
+          img.src = src
+          img.className = 'label-img'
+          item.appendChild(img)
+        })
+      }
+    }
+
+    // determine ordering
+    if (isRow){
+      // in a row, if image is on the right side, put text first
+      if (['right','top-right','bottom-right'].includes(imgPos)){
+        item.appendChild(span)
+        appendImages()
+      } else {
+        appendImages()
+        item.appendChild(span)
+      }
+    } else {
+      // column layout: if image is bottom, put text first
+      if (imgPos === 'bottom'){
+        item.appendChild(span)
+        appendImages()
+      } else {
+        appendImages()
+        item.appendChild(span)
+      }
+    }
+
+    // adjust text alignment according to position
+    if (imgPos.includes('left')) span.style.textAlign = 'left'
+    else if (imgPos.includes('right')) span.style.textAlign = 'right'
+    else span.style.textAlign = 'center'
+
+    // crossmark borders
     const bsVal = borderStyle ? borderStyle.value : (document.documentElement.getAttribute('data-border-style') || 'none')
     if (bsVal === 'crossmarks'){
       item.style.position = 'relative'
-      const size = 6
-      const thickness = 0.45
       const addMark = (opts)=>{
         const m = document.createElement('div')
         m.className = 'crossmark'
-        m.style.width = `${size}mm`
-        m.style.height = `${thickness}mm`
+        m.style.width = `6mm`
+        m.style.height = `0.45mm`
         m.style.background = '#000'
         m.style.position = 'absolute'
         if (opts.top) m.style.top = opts.top
@@ -161,6 +261,7 @@ function generateSheet() {
       addMark({bottom:'0.6mm',right:'0.6mm',rot:false})
       addMark({bottom:'0.6mm',right:'0.6mm',rot:true})
     }
+
     sheet.appendChild(item)
   }
   // reflect chosen border style onto root element so print CSS picks it up
@@ -168,17 +269,13 @@ function generateSheet() {
 }
 
 function applyPageSettings(){
-  // page size
   if (pageSize.value === 'A4'){
     document.documentElement.style.setProperty('--page-width','210mm')
     document.documentElement.style.setProperty('--page-height','297mm')
   } else {
-    // Letter fallback in mm
     document.documentElement.style.setProperty('--page-width','216mm')
     document.documentElement.style.setProperty('--page-height','279mm')
   }
-
-  // margins
   if (marginPreset.value !== 'custom'){
     const m = marginPreset.selectedOptions[0].dataset.m || '10'
     const mval = `${m}mm`
@@ -189,7 +286,6 @@ function applyPageSettings(){
     dynamicStyle.textContent = `@page { size: ${pageSize.value}; margin: ${mval}; }`
     customMargins.style.display = 'none'
   } else {
-    // read custom inputs (allow empty -> 0)
     const t = (marginTop.value||'0') + 'mm'
     const r = (marginRight.value||'0') + 'mm'
     const b = (marginBottom.value||'0') + 'mm'
@@ -210,20 +306,16 @@ layoutSelect.addEventListener('change', ()=>{
   rowsInput.value = opt.dataset.rows || rowsInput.value
 })
 
-// label height UI
 labelHeightMode.addEventListener('change', ()=>{
   if (labelHeightMode.value === 'custom') labelHeightCustom.style.display = 'inline-block'
   else labelHeightCustom.style.display = 'none'
 })
 
-// font size control
 fontSizeRange.addEventListener('input', ()=>{
   const v = fontSizeRange.value
   fontSizeLabel.textContent = `${v}pt`
   document.documentElement.style.setProperty('--label-font-size', `${v}pt`)
 })
-
-// set default font-size var
 document.documentElement.style.setProperty('--label-font-size','12pt')
 
 pageSize.addEventListener('change', applyPageSettings)
@@ -233,7 +325,6 @@ marginRight.addEventListener('input', applyPageSettings)
 marginBottom.addEventListener('input', applyPageSettings)
 marginLeft.addEventListener('input', applyPageSettings)
 
-// initialize and watch border style select (reflect on root element for print CSS)
 if (borderStyle){
   document.documentElement.setAttribute('data-border-style', borderStyle.value)
   borderStyle.addEventListener('change', ()=>{
@@ -241,18 +332,69 @@ if (borderStyle){
   })
 }
 
-// apply defaults on load
+// Modal
+function openEditModal(index){
+  currentEditIndex = index
+  const entry = labels[index] || { text:'', imgs:[], fontSize:12, imagePosition:'center' }
+  modalLabelText.value = entry.text || ''
+  modalFontSize.value = entry.fontSize || 12
+  modalImagePosition.value = entry.imagePosition || 'center'
+  modalImgs = Array.isArray(entry.imgs) ? entry.imgs.slice() : []
+  renderModalImages()
+  editModal.setAttribute('aria-hidden','false')
+}
+
+function closeEditModal(){
+  editModal.setAttribute('aria-hidden','true')
+  currentEditIndex = null
+  modalImgs = []
+}
+
+function renderModalImages(){
+  modalImages.innerHTML = ''
+  modalImgs.forEach((src,idx)=>{
+    const w = document.createElement('div')
+    w.className = 'mimg'
+    const img = document.createElement('img')
+    img.src = src
+    w.appendChild(img)
+    const rem = document.createElement('button')
+    rem.textContent = '×'
+    rem.title = 'Remove'
+    rem.dataset.i = idx
+    rem.addEventListener('click', ()=>{ modalImgs.splice(idx,1); renderModalImages() })
+    w.appendChild(rem)
+    modalImages.appendChild(w)
+  })
+}
+
+modalImageInput.addEventListener('change', (e)=>{
+  const files = Array.from(e.target.files||[])
+  if (!files.length) return
+  let loaded = 0
+  files.forEach(f=>{
+    const r = new FileReader()
+    r.onload = ()=>{ modalImgs.push(r.result); loaded++; if (loaded===files.length) renderModalImages() }
+    r.readAsDataURL(f)
+  })
+  modalImageInput.value = ''
+})
+
+modalCancel.addEventListener('click', ()=> closeEditModal())
+modalSave.addEventListener('click', ()=>{
+  if (currentEditIndex === null) return closeEditModal()
+  const entry = labels[currentEditIndex] || {}
+  entry.text = modalLabelText.value
+  entry.imgs = modalImgs.slice()
+  entry.fontSize = Number(modalFontSize.value) || 12
+  entry.imagePosition = modalImagePosition.value || 'center'
+  labels[currentEditIndex] = entry
+  renderLabels()
+  closeEditModal()
+})
+
+// apply defaults and wire generate/print
 applyPageSettings()
-
-generateBtn.addEventListener('click', () => {
-  if (labels.length === 0) return alert('Add at least one label')
-  generateSheet()
-})
-
-printBtn.addEventListener('click', () => {
-  if (sheet.children.length === 0) generateSheet()
-  window.print()
-})
-
-// initial
+generateBtn.addEventListener('click', ()=>{ if (!labels.length) return alert('Add at least one label'); generateSheet() })
+printBtn.addEventListener('click', ()=>{ if (!sheet.children.length) generateSheet(); window.print() })
 renderLabels()
