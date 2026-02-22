@@ -21,7 +21,18 @@ html[data-theme="dark"] body{ background:#0b1220; color:#e6eef8 }
 html[data-theme="dark"] .app{ background:#071226; box-shadow:none }
 html[data-theme="dark"] .box{ background:#071226; border-color:#173146 }
 html[data-theme="dark"] .label-item{ color:#e6eef8 }
-header h1{margin:0}
+header{background:transparent}
+.level h1.title{margin-bottom:1em}
+header.subtitle, header .subtitle{margin:0}
+/* ensure header has spacing to avoid overlapping the controls on small screens */
+header.level{align-items:flex-start;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+
+/* Stack header content on narrow viewports to avoid overlaps */
+@media (max-width: 720px){
+  header.level{flex-direction:column;align-items:flex-start}
+  header.level .level-right{align-self:flex-end;margin-top:8px}
+  .controls{margin-top:6px}
+}
 .controls{display:flex;gap:16px;flex-wrap:wrap;margin:12px 0}
 .controls label, .add-label, .actions{display:flex;align-items:center;gap:8px}
 .add-label input[type=file]{width:180px}

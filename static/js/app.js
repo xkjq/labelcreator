@@ -60,9 +60,14 @@ function isUsingPreset(){
   // if user explicitly selected the 'custom' option, treat as custom
   if (layoutSelect.value === 'custom') return false
   const opt = layoutSelect.selectedOptions[0]
-  const presetCols = opt && opt.dataset && opt.dataset.cols ? String(opt.dataset.cols) : null
-  const presetRows = opt && opt.dataset && opt.dataset.rows ? String(opt.dataset.rows) : null
-  return (String(colsInput.value || '') === (presetCols || '')) && (String(rowsInput.value || '') === (presetRows || ''))
+  const presetCols = opt && opt.dataset && opt.dataset.cols ? String(opt.dataset.cols).trim() : null
+  const presetRows = opt && opt.dataset && opt.dataset.rows ? String(opt.dataset.rows).trim() : null
+  const valCols = String(colsInput.value || '').trim()
+  const valRows = String(rowsInput.value || '').trim()
+  // if both sides are numeric, compare numerically, otherwise compare trimmed strings
+  const colsMatch = (presetCols !== null && valCols !== '') ? (Number(presetCols) === Number(valCols)) : (valCols === (presetCols || ''))
+  const rowsMatch = (presetRows !== null && valRows !== '') ? (Number(presetRows) === Number(valRows)) : (valRows === (presetRows || ''))
+  return colsMatch && rowsMatch
 }
 
 function updateLayoutVisibility(){
@@ -191,10 +196,16 @@ async function loadOptimize(){
 }
 function updateModeVisibility(){
   const useOptimize = (document.getElementById('modeOptimize') && document.getElementById('modeOptimize').checked)
-  document.querySelectorAll('.label-mode').forEach(e=>{
-    // keep inline display where appropriate
-    e.style.display = useOptimize ? 'none' : ''
-  })
+  const labelModeEls = document.querySelectorAll('.label-mode')
+  if (useOptimize){
+    // hide all label-mode controls when using Optimize
+    labelModeEls.forEach(e=>{ e.style.display = 'none' })
+  } else {
+    // restore per-control visibility by re-applying page/layout settings
+    // this avoids overwriting visibility set by applyPageSettings() or updateLayoutVisibility()
+    applyPageSettings()
+    updateLayoutVisibility()
+  }
   const optSec = document.getElementById('optimizeSection')
   if (optSec) optSec.style.display = useOptimize ? '' : 'none'
 }
@@ -749,6 +760,18 @@ function applyPageSettings(){
 // sync layout select -> cols/rows inputs
 // (handled above in the primary change listener; duplicate handler removed)
 
+// initialize layout inputs from the selected preset (called on startup)
+function initLayoutInputs(){
+  if (!layoutSelect || !colsInput || !rowsInput) return
+  const opt = layoutSelect.selectedOptions[0]
+  if (!opt) return
+  if (layoutSelect.value !== 'custom'){
+    // set cols/rows to match the selected preset so visibility logic can work reliably
+    colsInput.value = opt.dataset.cols || colsInput.value
+    rowsInput.value = opt.dataset.rows || rowsInput.value
+  }
+}
+
 labelHeightMode.addEventListener('change', ()=>{
   if (labelHeightMode.value === 'custom') labelHeightCustom.style.display = 'inline-block'
   else labelHeightCustom.style.display = 'none'
@@ -1059,4 +1082,4 @@ if (clearAllBtn){
   })
 }
 // load labels from storage (falls back to empty and renders), then set layout visibility
-Promise.all([loadLabels(), loadOptimize()]).then(()=> { updateLayoutVisibility(); updateModeVisibility() }).catch(()=> { updateLayoutVisibility(); updateModeVisibility() })
+Promise.all([loadLabels(), loadOptimize()]).then(()=> { initLayoutInputs(); updateLayoutVisibility(); updateModeVisibility() }).catch(()=> { initLayoutInputs(); updateLayoutVisibility(); updateModeVisibility() })
