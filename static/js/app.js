@@ -44,7 +44,15 @@ let labels = [] // each entry: { text, imgs:[], fontSize, imagePosition }
 const STORAGE_KEY = 'labelcreator.labels'
 
 function saveLabels(){
-  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(labels)) }catch(e){ console.warn('saveLabels failed', e) }
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(labels))
+  }catch(e){
+    console.warn('saveLabels failed (possibly quota); retrying without images', e)
+    try{
+      const stripped = labels.map(l=>({ text: l.text, fontSize: l.fontSize, imagePosition: l.imagePosition, positions: l.positions || null, imgs: [] }))
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(stripped))
+    }catch(e2){ console.warn('saveLabels fallback failed', e2) }
+  }
 }
 
 function loadLabels(){
@@ -52,6 +60,7 @@ function loadLabels(){
     const s = localStorage.getItem(STORAGE_KEY)
     if (s){ labels = JSON.parse(s) }
   }catch(e){ console.warn('loadLabels failed', e) }
+  console.debug('loadLabels: restored', labels.length, 'labels')
   renderLabels()
 }
 
@@ -89,6 +98,7 @@ labelsList.addEventListener('click',(e)=>{
     const i = Number(e.target.dataset.i)
     labels.splice(i,1)
     renderLabels()
+    saveLabels()
   }
   if (e.target.classList.contains('edit')){
     const i = Number(e.target.dataset.i)
@@ -107,6 +117,7 @@ addLabelBtn.addEventListener('click', ()=>{
     r.onload = ()=>{
       labels.push({ text, imgs:[r.result], fontSize: defaultFont, imagePosition: pos })
       renderLabels()
+      saveLabels()
       labelText.value = ''
       labelImage.value = ''
     }
@@ -114,6 +125,7 @@ addLabelBtn.addEventListener('click', ()=>{
   } else {
     labels.push({ text, imgs:[], fontSize: defaultFont, imagePosition: pos })
     renderLabels()
+    saveLabels()
     labelText.value = ''
   }
 })
@@ -594,6 +606,7 @@ modalSave.addEventListener('click', ()=>{
   }
   labels[currentEditIndex] = entry
   renderLabels()
+  saveLabels()
   closeEditModal()
 })
 
@@ -656,4 +669,5 @@ if (clearAllBtn){
     sheet.innerHTML = ''
   })
 }
-renderLabels()
+// load labels from storage (falls back to empty and renders)
+loadLabels()
