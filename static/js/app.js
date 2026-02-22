@@ -105,6 +105,7 @@ const optimizeAnalyzeBtn = document.getElementById('optimizeAnalyzeBtn')
 const optimizeAutoBtn = document.getElementById('optimizeAutoBtn')
 const optimizeGenerateBtn = document.getElementById('optimizeGenerateBtn')
 const optimizeInfo = document.getElementById('optimizeInfo')
+const optimizePrintBtn = document.getElementById('optimizePrintBtn')
 
 let optimizeImageData = null
 let optimizeAspect = 1
@@ -135,6 +136,22 @@ if (optimizeImageInput){
     r.readAsDataURL(f)
   })
 }
+
+// Mode switching: show/hide controls depending on selected generation mode
+function updateModeVisibility(){
+  const useOptimize = (document.getElementById('modeOptimize') && document.getElementById('modeOptimize').checked)
+  document.querySelectorAll('.label-mode').forEach(e=>{
+    // keep inline display where appropriate
+    e.style.display = useOptimize ? 'none' : ''
+  })
+  const optSec = document.getElementById('optimizeSection')
+  if (optSec) optSec.style.display = useOptimize ? '' : 'none'
+}
+
+const modeLabels = document.getElementById('modeLabels')
+const modeOptimize = document.getElementById('modeOptimize')
+if (modeLabels) modeLabels.addEventListener('change', updateModeVisibility)
+if (modeOptimize) modeOptimize.addEventListener('change', updateModeVisibility)
 
 function analyzeLayout(targetWidthMm){
   // returns {cols, rows, tileW, tileH, count}
@@ -225,6 +242,13 @@ async function generateOptimizedSheet(){
 }
 
 if (optimizeGenerateBtn){ optimizeGenerateBtn.addEventListener('click', generateOptimizedSheet) }
+if (optimizePrintBtn){
+  optimizePrintBtn.addEventListener('click', ()=>{
+    // ensure sheet is generated, then print after layout settles
+    if (!sheet.children.length) generateOptimizedSheet()
+    requestAnimationFrame(()=> requestAnimationFrame(()=> window.print()))
+  })
+}
 
 // modal elements
 const editModal = document.getElementById('editModal')
@@ -968,4 +992,4 @@ if (clearAllBtn){
   })
 }
 // load labels from storage (falls back to empty and renders), then set layout visibility
-loadLabels().then(()=> updateLayoutVisibility()).catch(()=> updateLayoutVisibility())
+loadLabels().then(()=> { updateLayoutVisibility(); updateModeVisibility() }).catch(()=> { updateLayoutVisibility(); updateModeVisibility() })

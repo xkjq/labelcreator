@@ -14,7 +14,12 @@
       </header>
 
       <section class="controls">
-        <label>
+        <div style="width:100%;display:flex;gap:12px;align-items:center;margin-bottom:6px">
+          <strong style="margin-right:6px">Mode:</strong>
+          <label style="display:flex;align-items:center;gap:6px"><input type="radio" name="mode" id="modeLabels" value="labels" checked> Create from labels</label>
+          <label style="display:flex;align-items:center;gap:6px"><input type="radio" name="mode" id="modeOptimize" value="optimize"> Optimize image layout</label>
+        </div>
+        <label class="label-mode">
           Preset layout:
           <select id="layoutSelect">
             <option value="2x4" data-cols="2" data-rows="4">2 × 4</option>
@@ -26,16 +31,16 @@
           </select>
         </label>
 
-        <label>
+        <label class="label-mode">
           Columns:
           <input id="colsInput" type="number" min="1" max="10" value="3" style="width:60px">
         </label>
-        <label>
+        <label class="label-mode">
           Rows:
           <input id="rowsInput" type="number" min="1" max="40" value="8" style="width:60px">
         </label>
 
-        <label>
+        <label class="label-mode">
           Page size:
           <select id="pageSize">
             <option value="A4" selected>A4 (210 × 297 mm)</option>
@@ -43,7 +48,7 @@
           </select>
         </label>
 
-        <label>
+        <label class="label-mode">
           Margins:
           <select id="marginPreset">
             <option value="standard" data-m="10">Standard (10mm)</option>
@@ -54,14 +59,14 @@
           </select>
         </label>
 
-        <div id="customMargins" style="display:none;align-items:center;gap:6px;">
+        <div id="customMargins" class="label-mode" style="display:none;align-items:center;gap:6px;">
           <input id="marginTop" placeholder="top mm" size="4">
           <input id="marginRight" placeholder="right mm" size="4">
           <input id="marginBottom" placeholder="bottom mm" size="4">
           <input id="marginLeft" placeholder="left mm" size="4">
         </div>
 
-        <label>
+        <label class="label-mode">
           Border style:
           <select id="borderStyle">
             <option value="none" selected>None</option>
@@ -72,7 +77,7 @@
           </select>
         </label>
 
-        <label>
+        <label class="label-mode">
           Label height:
           <select id="labelHeightMode">
             <option value="standard" selected>Standard (uses rows)</option>
@@ -80,9 +85,9 @@
             <option value="custom">Custom (mm)</option>
           </select>
         </label>
-        <input id="labelHeightCustom" placeholder="mm" size="4" style="display:none">
+        <input id="labelHeightCustom" class="label-mode" placeholder="mm" size="4" style="display:none">
 
-        <div class="label-defaults" style="display:flex;flex-direction:column;gap:8px;">
+        <div class="label-defaults label-mode" style="display:flex;flex-direction:column;gap:8px;">
           <h3 style="margin:0 0 6px 0">Label defaults</h3>
           <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
             <label>
@@ -118,18 +123,17 @@
           </div>
         </div>
 
-        <div class="add-label">
+        <div class="add-label label-mode">
           <input id="labelText" placeholder="Child name or label text">
           <input id="labelImage" type="file" accept="image/*">
           <button id="addLabelBtn">Add Label</button>
         </div>
 
-        <div class="label-list">
+        <div class="label-list label-mode">
           <h3>Labels</h3>
           <ul id="labels"></ul>
         </div>
-
-        <div class="actions">
+        <div class="actions label-mode">
           <button id="generateBtn">Generate Sheet</button>
           <button id="printBtn">Print</button>
           <button id="clearAllBtn">Clear all</button>
@@ -158,8 +162,9 @@
         </label>
         <div style="display:flex;gap:8px;align-items:center">
           <button id="optimizeAnalyzeBtn">Analyze</button>
-          <button id="optimizeAutoBtn">Auto optimize scale</button>
+          <button id="optimizeAutoBtn">Auto optimize</button>
           <button id="optimizeGenerateBtn">Generate optimized sheet</button>
+          <button id="optimizePrintBtn">Print</button>
         </div>
         <div id="optimizeInfo" style="margin-top:8px;color:#333"></div>
       </section>
