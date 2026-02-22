@@ -1,20 +1,38 @@
-# Label Creator — Browser-only
+# Label Creator
 
-This is a small static web app that runs entirely in the browser to generate printable label sheets. No server or dependencies required.
+A small client-side app for composing and printing label sheets from text and images.
 
-Usage
+Features
+- Generate printable label sheets using preset or custom layouts (columns × rows).
+- Custom margins and label heights, with inline controls that appear to the right when space allows.
+- Per-label images and text, manual positioning via the edit modal.
+- Ordering modes: Sequential (interleaved), Grouped, and Random.
+- An "Optimize" mode to tile a single image across a page.
 
-1. Open `index.html` in a modern browser (double-click the file or use a local static server).
+Quick start
 
-2. Select a layout, add labels (text and/or images), press `Generate Sheet`, then `Print`.
+1. Open the project folder and start a simple static server (Python 3):
 
-Notes
+```bash
+cd /path/to/labelcreator
+python3 -m http.server 8000
+```
 
-- Images are handled in-memory (Data URLs) and are not uploaded to any server.
-- For best printing results, use Chrome or Firefox print preview and set page size/margins to match your labels.
+2. Open your browser at http://localhost:8000 and load `index.html`.
 
-Printing tips
+How to use
+- Select "Label generator" mode and choose a preset layout or `Custom` to show inline custom controls.
+- Add labels using the input and optional image upload, edit labels to position images/text.
+- Choose the label ordering mode before clicking "Generate Sheet".
+- Use "Print" to print the generated sheet (print CSS preserves physical sizes).
 
-- Set the browser print scale to 100% (no "fit to page") so mm sizes are preserved.
-- In Chrome/Edge print dialog, uncheck "Headers and footers" and enable "Background graphics" for best fidelity.
-- Use the `Page size` and `Margins` controls in the UI to match your label sheet; the app computes exact label sizes in mm.
+Files
+- `index.html` — main UI and markup.
+- `static/css/style.css` — styles and responsive layout rules.
+- `static/js/app.js` — app logic: presets, generation, storage, and modal editing.
+
+Development notes
+- The app stores images in IndexedDB and metadata in `localStorage`.
+- To preview changes quickly, run the static server above and refresh the browser.
+
+If you'd like, I can add a small preview screenshot, enhance the development workflow, or wire up automated tests.
