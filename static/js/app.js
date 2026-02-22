@@ -25,6 +25,7 @@ const labelHeightCustom = document.getElementById('labelHeightCustom')
 const fontSizeRange = document.getElementById('fontSizeRange')
 const fontSizeLabel = document.getElementById('fontSizeLabel')
 const fontSelect = document.getElementById('fontSelect')
+const orderMode = document.getElementById('orderMode')
 
 const FONT_KEY = 'labelcreator.fontFamily'
 
@@ -632,8 +633,25 @@ function generateSheet(){
     item.className = 'label'
     item.style.width = `${labelW}mm`
     item.style.height = `${labelH}mm`
-    // get label data
-    const data = labels.length ? labels[i % labels.length] : { text:'', imgs:[], fontSize: null, imagePosition: null }
+    // determine which label to use for this cell according to ordering mode
+    let data
+    if (!labels.length) data = { text:'', imgs:[], fontSize: null, imagePosition: null }
+    else {
+      const mode = orderMode ? orderMode.value : 'interleaved'
+      let idx
+      if (mode === 'grouped'){
+        // group labels in contiguous blocks: compute repeats per label
+        const repeats = Math.ceil(count / labels.length) || 1
+        idx = Math.floor(i / repeats)
+        if (idx >= labels.length) idx = labels.length - 1
+      } else if (mode === 'random'){
+        idx = Math.floor(Math.random() * labels.length)
+      } else {
+        // interleaved / sequential (default): cycle through labels
+        idx = i % labels.length
+      }
+      data = labels[idx]
+    }
 
     // layout based on per-label imagePosition (fallback to global)
     const imgPos = (data.imagePosition) ? data.imagePosition : (imagePosition ? imagePosition.value : 'center')

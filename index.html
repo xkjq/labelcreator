@@ -112,6 +112,14 @@
           </select>
         </label>
         <input id="labelHeightCustom" class="label-mode conditional-box" placeholder="mm" size="4" style="display:none">
+          <label>
+            Order:
+            <select id="orderMode">
+              <option value="interleaved" selected>Sequential</option>
+              <option value="grouped">Grouped (all of each label)</option>
+              <option value="random">Random</option>
+            </select>
+          </label>
 
         <div class="label-defaults label-mode" style="display:flex;flex-direction:column;gap:8px;">
           <h3 style="margin:0 0 6px 0">Label defaults</h3>
