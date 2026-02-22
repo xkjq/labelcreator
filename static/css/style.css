@@ -88,6 +88,22 @@ header.level{align-items:flex-start;gap:12px;margin-bottom:18px;flex-wrap:wrap}
 .modal-preview .label-img{max-width:100%;max-height:60%;object-fit:contain}
 .modal-preview .label-text{font-weight:600;font-size:var(--label-font-size);text-align:center;font-family:var(--label-font-family)}
 
+/* Option grouping for conditional/custom controls */
+.option-group{display:flex;align-items:center;gap:12px}
+.option-group .custom-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.option-group{flex-wrap:wrap;flex:0 1 auto}
+.option-group .label-mode{white-space:nowrap}
+@media (min-width:720px){
+  .option-group{flex-wrap:nowrap}
+  .option-group .custom-controls{margin-left:8px}
+}
+.option-group--custom{background: #f6fbff;border:1px solid #dbeafe;padding:8px;border-radius:8px}
+html[data-theme="dark"] .option-group--custom{background:#072031;border-color:#083245}
+
+/* Generic conditional box styling (margins, custom height, etc) */
+#customMargins.conditional-box, #labelHeightCustom.conditional-box{background:#fcfcfe;border:1px solid #eef2ff;padding:8px;border-radius:6px;align-items:center}
+html[data-theme="dark"] #customMargins.conditional-box, html[data-theme="dark"] #labelHeightCustom.conditional-box{background:#071226;border-color:#173146}
+
 @media print{
   html,body{margin:0;padding:0;background:#fff}
   /* hide UI chrome but keep the page wrapper */

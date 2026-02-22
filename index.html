@@ -41,26 +41,30 @@
 
         <!-- wrap all label-related controls so mode toggling can hide/show the whole area -->
         <div id="labelsArea">
-        <label class="label-mode">
-          Preset layout:
-          <select id="layoutSelect">
-            <option value="2x4" data-cols="2" data-rows="4">2 × 4</option>
-            <option value="3x8" data-cols="3" data-rows="8" selected>3 × 8</option>
-            <option value="4x7" data-cols="4" data-rows="7">4 × 7</option>
-            <option value="3x10" data-cols="3" data-rows="10">3 × 10 (many thin)</option>
-            <option value="2x8" data-cols="2" data-rows="8">2 × 8</option>
+        <div id="layoutGroup" class="option-group">
+          <label class="label-mode">
+            Preset layout:
+            <select id="layoutSelect">
+                <option value="2x4" data-cols="2" data-rows="4" data-m="10" data-label-mode="standard">2 × 4</option>
+                <option value="3x8" data-cols="3" data-rows="8" selected data-m="10" data-label-mode="standard">3 × 8</option>
+                <option value="4x7" data-cols="4" data-rows="7" data-m="10" data-label-mode="standard">4 × 7</option>
+                <option value="3x10" data-cols="3" data-rows="10" data-m="5" data-label-mode="thin">3 × 10 (many thin)</option>
+                <option value="2x8" data-cols="2" data-rows="8" data-m="10" data-label-mode="standard">2 × 8</option>
               <option value="custom">Custom</option>
-          </select>
-        </label>
+            </select>
+          </label>
 
-        <label class="label-mode">
-          Columns:
-          <input id="colsInput" type="number" min="1" max="10" value="3" style="width:60px">
-        </label>
-        <label class="label-mode">
-          Rows:
-          <input id="rowsInput" type="number" min="1" max="40" value="8" style="width:60px">
-        </label>
+          <div class="custom-controls" style="display:flex;align-items:center;gap:8px;">
+            <label class="label-mode">
+              Columns:
+              <input id="colsInput" type="number" min="1" max="10" value="3" style="width:60px">
+            </label>
+            <label class="label-mode">
+              Rows:
+              <input id="rowsInput" type="number" min="1" max="40" value="8" style="width:60px">
+            </label>
+          </div>
+        </div>
 
         <label class="label-mode">
           Page size:
@@ -81,7 +85,7 @@
           </select>
         </label>
 
-        <div id="customMargins" class="label-mode" style="display:none;align-items:center;gap:6px;">
+        <div id="customMargins" class="label-mode conditional-box" style="display:none;align-items:center;gap:6px;">
           <input id="marginTop" placeholder="top mm" size="4">
           <input id="marginRight" placeholder="right mm" size="4">
           <input id="marginBottom" placeholder="bottom mm" size="4">
@@ -107,7 +111,7 @@
             <option value="custom">Custom (mm)</option>
           </select>
         </label>
-        <input id="labelHeightCustom" class="label-mode" placeholder="mm" size="4" style="display:none">
+        <input id="labelHeightCustom" class="label-mode conditional-box" placeholder="mm" size="4" style="display:none">
 
         <div class="label-defaults label-mode" style="display:flex;flex-direction:column;gap:8px;">
           <h3 style="margin:0 0 6px 0">Label defaults</h3>

@@ -52,6 +52,7 @@ if (fontSelect){
 
 // layout visibility toggles: hide preset when custom values are used, and vice-versa
 const layoutLabel = layoutSelect ? layoutSelect.closest('label') : null
+const layoutGroup = document.getElementById('layoutGroup')
 const colsLabel = colsInput ? colsInput.closest('label') : null
 const rowsLabel = rowsInput ? rowsInput.closest('label') : null
 
@@ -76,6 +77,8 @@ function updateLayoutVisibility(){
     if (layoutLabel) layoutLabel.style.display = ''
     if (colsLabel) colsLabel.style.display = ''
     if (rowsLabel) rowsLabel.style.display = ''
+    // visually mark the group as custom
+    if (layoutGroup) layoutGroup.classList.add('option-group--custom')
     return
   }
 
@@ -83,6 +86,10 @@ function updateLayoutVisibility(){
   if (layoutLabel) layoutLabel.style.display = preset ? '' : 'none'
   if (colsLabel) colsLabel.style.display = preset ? 'none' : ''
   if (rowsLabel) rowsLabel.style.display = preset ? 'none' : ''
+  if (layoutGroup){
+    if (!preset) layoutGroup.classList.add('option-group--custom')
+    else layoutGroup.classList.remove('option-group--custom')
+  }
 }
 
 if (layoutSelect){
@@ -92,6 +99,34 @@ if (layoutSelect){
     if (opt && opt.dataset && layoutSelect.value !== 'custom'){
       if (colsInput) colsInput.value = opt.dataset.cols || ''
       if (rowsInput) rowsInput.value = opt.dataset.rows || ''
+      // update margins to match preset if provided
+      try{
+        const m = opt.dataset.m
+        if (typeof m !== 'undefined' && marginPreset){
+          // try to find a margin preset option matching the dataset.m value
+          const match = Array.from(marginPreset.options).find(o => (o.dataset && o.dataset.m) === String(m))
+          if (match){
+            marginPreset.value = match.value
+          } else {
+            // fallback: set custom margins inputs and select 'custom'
+            marginPreset.value = 'custom'
+            if (marginTop) marginTop.value = m
+            if (marginRight) marginRight.value = m
+            if (marginBottom) marginBottom.value = m
+            if (marginLeft) marginLeft.value = m
+          }
+        }
+        // update label height mode if provided
+        const lm = opt.dataset.labelMode
+        if (typeof lm !== 'undefined' && labelHeightMode){
+          labelHeightMode.value = lm
+          // if custom height provided as data-label-custom, set input
+          const customH = opt.dataset.labelCustom
+          if (lm === 'custom' && customH && labelHeightCustom) labelHeightCustom.value = customH
+          // trigger change handler to show/hide custom input
+          try{ labelHeightMode.dispatchEvent(new Event('change')) }catch(e){}
+        }
+      }catch(e){/* ignore */}
     }
     updateLayoutVisibility()
   })
