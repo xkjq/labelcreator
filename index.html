@@ -136,6 +136,34 @@
         </div>
       </section>
 
+      <!-- Optimize layout section -->
+      <section class="controls" id="optimizeSection" style="margin-top:12px;border-top:1px solid #eee;padding-top:12px;">
+        <h3 style="width:100%">Optimize image layout</h3>
+        <label>
+          Select image:
+          <input id="optimizeImageInput" type="file" accept="image/*">
+        </label>
+        <label>
+          Preview:
+          <img id="optimizePreview" src="" alt="" style="max-width:160px;max-height:120px;border:1px solid #ddd;padding:4px;background:#fff">
+        </label>
+        <label>
+          Target width (mm):
+          <input id="optimizeScale" type="range" min="10" max="200" step="1" value="50" style="width:200px">
+          <span id="optimizeScaleLabel">50 mm</span>
+        </label>
+        <label>
+          Gap between labels (mm):
+          <input id="optimizeGap" type="number" min="0" max="50" value="6" style="width:80px"> 
+        </label>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button id="optimizeAnalyzeBtn">Analyze</button>
+          <button id="optimizeAutoBtn">Auto optimize scale</button>
+          <button id="optimizeGenerateBtn">Generate optimized sheet</button>
+        </div>
+        <div id="optimizeInfo" style="margin-top:8px;color:#333"></div>
+      </section>
+
       <main>
         <h2>Preview / Sheet</h2>
         <div class="page">

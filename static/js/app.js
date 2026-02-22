@@ -95,6 +95,137 @@ if (layoutSelect){
 if (colsInput) colsInput.addEventListener('input', ()=> updateLayoutVisibility())
 if (rowsInput) rowsInput.addEventListener('input', ()=> updateLayoutVisibility())
 
+// --- Optimize layout UI elements ---
+const optimizeImageInput = document.getElementById('optimizeImageInput')
+const optimizePreview = document.getElementById('optimizePreview')
+const optimizeScale = document.getElementById('optimizeScale')
+const optimizeScaleLabel = document.getElementById('optimizeScaleLabel')
+const optimizeGap = document.getElementById('optimizeGap')
+const optimizeAnalyzeBtn = document.getElementById('optimizeAnalyzeBtn')
+const optimizeAutoBtn = document.getElementById('optimizeAutoBtn')
+const optimizeGenerateBtn = document.getElementById('optimizeGenerateBtn')
+const optimizeInfo = document.getElementById('optimizeInfo')
+
+let optimizeImageData = null
+let optimizeAspect = 1
+
+// optimizeScale now represents target tile width in millimetres
+if (optimizeScale){
+  optimizeScale.addEventListener('input', ()=>{
+    const v = Number(optimizeScale.value)
+    if (optimizeScaleLabel) optimizeScaleLabel.textContent = v.toFixed(0) + ' mm'
+  })
+  // initialize label
+  if (optimizeScaleLabel) optimizeScaleLabel.textContent = (Number(optimizeScale.value)||50) + ' mm'
+}
+
+if (optimizeImageInput){
+  optimizeImageInput.addEventListener('change', (e)=>{
+    const f = (e.target.files && e.target.files[0]) || null
+    if (!f) return
+    const r = new FileReader()
+    r.onload = ()=>{
+      optimizeImageData = r.result
+      if (optimizePreview) optimizePreview.src = optimizeImageData
+      // determine aspect ratio
+      const img = new Image()
+      img.onload = ()=>{ optimizeAspect = img.height / img.width }
+      img.src = optimizeImageData
+    }
+    r.readAsDataURL(f)
+  })
+}
+
+function analyzeLayout(targetWidthMm){
+  // returns {cols, rows, tileW, tileH, count}
+  const root = getComputedStyle(document.documentElement)
+  const pageW = mm(root.getPropertyValue('--page-width') || '210mm')
+  const pageH = mm(root.getPropertyValue('--page-height') || '297mm')
+  const mTop = mm(root.getPropertyValue('--margin-top') || '10mm')
+  const mRight = mm(root.getPropertyValue('--margin-right') || '10mm')
+  const mBottom = mm(root.getPropertyValue('--margin-bottom') || '10mm')
+  const mLeft = mm(root.getPropertyValue('--margin-left') || '10mm')
+  const contentW = pageW - mLeft - mRight
+  const contentH = pageH - mTop - mBottom
+  const gap = Number(optimizeGap ? optimizeGap.value : 6) || 6
+
+  const tileW = Number(targetWidthMm) || 0
+  if (tileW <= 0) return { cols:0, rows:0, tileW:0, tileH:0, count:0 }
+  const tileH = tileW * optimizeAspect
+  const cols = Math.max(0, Math.floor((contentW + gap) / (tileW + gap)))
+  const rows = Math.max(0, Math.floor((contentH + gap) / (tileH + gap)))
+  const count = cols * rows
+  return { cols, rows, tileW, tileH, count }
+}
+
+function showAnalyzeResult(res){
+  if (!optimizeInfo) return
+  if (!res || res.count===0){
+    optimizeInfo.textContent = 'No layout fits the page with the current settings.'
+    return
+  }
+  optimizeInfo.innerHTML = `Columns: ${res.cols}, Rows: ${res.rows}, Per page: ${res.count} — Tile: ${res.tileW.toFixed(1)}mm × ${res.tileH.toFixed(1)}mm` 
+}
+
+if (optimizeAnalyzeBtn){
+  optimizeAnalyzeBtn.addEventListener('click', ()=>{
+    const s = Number(optimizeScale ? optimizeScale.value : 1) || 1
+    const res = analyzeLayout(s)
+    showAnalyzeResult(res)
+  })
+}
+
+if (optimizeAutoBtn){
+  optimizeAutoBtn.addEventListener('click', ()=>{
+    // search target widths between 10mm and content width to maximize count
+    const root = getComputedStyle(document.documentElement)
+    const pageW = mm(root.getPropertyValue('--page-width') || '210mm')
+    const pageH = mm(root.getPropertyValue('--page-height') || '297mm')
+    const mTop = mm(root.getPropertyValue('--margin-top') || '10mm')
+    const mRight = mm(root.getPropertyValue('--margin-right') || '10mm')
+    const mBottom = mm(root.getPropertyValue('--margin-bottom') || '10mm')
+    const mLeft = mm(root.getPropertyValue('--margin-left') || '10mm')
+    const contentW = pageW - mLeft - mRight
+    let bestAll = { count:0, width:10, result:null }
+    const maxWidth = Math.min( Math.floor(contentW), 200 )
+    for (let w=10; w<=maxWidth; w+=1){
+      const res = analyzeLayout(w)
+      if (res.count > bestAll.count){ bestAll = { count: res.count, width: w, result: res } }
+    }
+    if (optimizeScale) optimizeScale.value = bestAll.width
+    if (optimizeScaleLabel) optimizeScaleLabel.textContent = bestAll.width + ' mm'
+    showAnalyzeResult(bestAll.result)
+  })
+}
+
+async function generateOptimizedSheet(){
+  if (!optimizeImageData) return alert('Select an image first')
+  const targetW = Number(optimizeScale ? optimizeScale.value : 50) || 50
+  const res = analyzeLayout(targetW)
+  if (!res || res.count===0) return alert('No layout fits the page with current settings')
+  const cols = res.cols, rows = res.rows
+  sheet.innerHTML = ''
+  sheet.style.gridTemplateColumns = `repeat(${cols}, ${res.tileW}mm)`
+  sheet.style.gridTemplateRows = `repeat(${rows}, ${res.tileH}mm)`
+  const count = cols * rows
+  for (let i=0;i<count;i++){
+    const item = document.createElement('div')
+    item.className = 'label'
+    item.style.width = `${res.tileW}mm`
+    item.style.height = `${res.tileH}mm`
+    const img = document.createElement('img')
+    img.src = optimizeImageData
+    img.className = 'label-img'
+    // scale the image to fit the tile while preserving aspect
+    img.style.maxHeight = '100%'
+    img.style.maxWidth = '100%'
+    item.appendChild(img)
+    sheet.appendChild(item)
+  }
+}
+
+if (optimizeGenerateBtn){ optimizeGenerateBtn.addEventListener('click', generateOptimizedSheet) }
+
 // modal elements
 const editModal = document.getElementById('editModal')
 const modalLabelText = document.getElementById('modalLabelText')
