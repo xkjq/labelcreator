@@ -82,36 +82,41 @@
         </label>
         <input id="labelHeightCustom" placeholder="mm" size="4" style="display:none">
 
-        <label>
-          Text size:
-          <input id="fontSizeRange" type="range" min="6" max="24" value="12">
-          <span id="fontSizeLabel">12pt</span>
-        </label>
-        <label>
-          Font:
-          <select id="fontSelect">
-            <option value="system-ui,Segoe UI,Arial,sans-serif">System</option>
-            <option value="Roboto,Arial,Helvetica,sans-serif">Roboto</option>
-            <option value="'Helvetica Neue',Helvetica,Arial,sans-serif">Helvetica</option>
-            <option value="Georgia,serif">Georgia</option>
-            <option value="'Times New Roman',Times,serif">Times</option>
-            <option value="'Courier New',Courier,monospace">Monospace</option>
-          </select>
-        </label>
-        <label>
-          Image position:
-          <select id="imagePosition">
-            <option value="center" selected>Center</option>
-            <option value="top">Top</option>
-            <option value="bottom">Bottom</option>
-            <option value="left">Left</option>
-            <option value="right">Right</option>
-            <option value="top-left">Top-left</option>
-            <option value="top-right">Top-right</option>
-            <option value="bottom-left">Bottom-left</option>
-            <option value="bottom-right">Bottom-right</option>
-          </select>
-        </label>
+        <div class="label-defaults" style="display:flex;flex-direction:column;gap:8px;">
+          <h3 style="margin:0 0 6px 0">Label defaults</h3>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <label>
+              Text size:
+              <input id="fontSizeRange" type="range" min="6" max="24" value="12">
+              <span id="fontSizeLabel">12pt</span>
+            </label>
+            <label>
+              Font:
+              <select id="fontSelect">
+                <option value="system-ui,Segoe UI,Arial,sans-serif">System</option>
+                <option value="Roboto,Arial,Helvetica,sans-serif">Roboto</option>
+                <option value="'Helvetica Neue',Helvetica,Arial,sans-serif">Helvetica</option>
+                <option value="Georgia,serif">Georgia</option>
+                <option value="'Times New Roman',Times,serif">Times</option>
+                <option value="'Courier New',Courier,monospace">Monospace</option>
+              </select>
+            </label>
+            <label>
+              Image position:
+              <select id="imagePosition">
+                <option value="center" selected>Center</option>
+                <option value="top">Top</option>
+                <option value="bottom">Bottom</option>
+                <option value="left">Left</option>
+                <option value="right">Right</option>
+                <option value="top-left">Top-left</option>
+                <option value="top-right">Top-right</option>
+                <option value="bottom-left">Bottom-left</option>
+                <option value="bottom-right">Bottom-right</option>
+              </select>
+            </label>
+          </div>
+        </div>
 
         <div class="add-label">
           <input id="labelText" placeholder="Child name or label text">
