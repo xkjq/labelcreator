@@ -115,6 +115,8 @@
         <div class="actions">
           <button id="generateBtn">Generate Sheet</button>
           <button id="printBtn">Print</button>
+          <button id="diagBtn">Log dims</button>
+          <button id="clearAllBtn">Clear all</button>
         </div>
       </section>
 
@@ -158,6 +160,8 @@
           <label>Images:
             <input id="modalImageInput" type="file" accept="image/*" multiple>
           </label>
+          <label><input id="modalManualPosition" type="checkbox"> Manual positioning</label>
+          <div id="modalPreview" class="modal-preview" aria-hidden="true"></div>
           <div id="modalImages" class="modal-images"></div>
         </div>
         <footer>

@@ -54,6 +54,16 @@ header h1{margin:0}
 .mimg button{position:absolute;top:2px;right:2px;background:rgba(255,255,255,0.9);border:1px solid #ccc;padding:2px 4px;font-size:12px}
 .modal-content footer{display:flex;gap:8px;justify-content:flex-end;margin-top:8px}
 
+/* modal preview for manual positioning */
+.modal-preview{background:#fafafa;margin:6px 0;position:relative;overflow:auto;max-width:100%;max-height:60vh;padding:6px}
+.modal-preview-inner{position:relative;box-sizing:border-box;background:#fff;padding:0;display:block;margin:auto;overflow:visible}
+.modal-preview .preview-item{position:absolute;cursor:grab;touch-action:none}
+.modal-preview .preview-item:active{cursor:grabbing}
+.modal-preview .preview-text{position:absolute;cursor:grab;user-select:none;padding:2px 4px;text-align:center}
+/* Ensure modal preview uses same image/text sizing as the real labels */
+.modal-preview .label-img{max-width:100%;max-height:60%;object-fit:contain}
+.modal-preview .label-text{font-weight:600;font-size:var(--label-font-size);text-align:center}
+
 @media print{
   html,body{margin:0;padding:0;background:#fff}
   /* hide UI chrome but keep the page wrapper */
