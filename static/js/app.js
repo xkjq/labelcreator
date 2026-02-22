@@ -25,6 +25,51 @@ const labelHeightCustom = document.getElementById('labelHeightCustom')
 const fontSizeRange = document.getElementById('fontSizeRange')
 const fontSizeLabel = document.getElementById('fontSizeLabel')
 
+// layout visibility toggles: hide preset when custom values are used, and vice-versa
+const layoutLabel = layoutSelect ? layoutSelect.closest('label') : null
+const colsLabel = colsInput ? colsInput.closest('label') : null
+const rowsLabel = rowsInput ? rowsInput.closest('label') : null
+
+function isUsingPreset(){
+  if (!layoutSelect || !colsInput || !rowsInput) return true
+  // if user explicitly selected the 'custom' option, treat as custom
+  if (layoutSelect.value === 'custom') return false
+  const opt = layoutSelect.selectedOptions[0]
+  const presetCols = opt && opt.dataset && opt.dataset.cols ? String(opt.dataset.cols) : null
+  const presetRows = opt && opt.dataset && opt.dataset.rows ? String(opt.dataset.rows) : null
+  return (String(colsInput.value || '') === (presetCols || '')) && (String(rowsInput.value || '') === (presetRows || ''))
+}
+
+function updateLayoutVisibility(){
+  // if 'custom' is actively selected, keep the preset select visible but also show custom inputs
+  if (layoutSelect && layoutSelect.value === 'custom'){
+    if (layoutLabel) layoutLabel.style.display = ''
+    if (colsLabel) colsLabel.style.display = ''
+    if (rowsLabel) rowsLabel.style.display = ''
+    return
+  }
+
+  const preset = isUsingPreset()
+  if (layoutLabel) layoutLabel.style.display = preset ? '' : 'none'
+  if (colsLabel) colsLabel.style.display = preset ? 'none' : ''
+  if (rowsLabel) rowsLabel.style.display = preset ? 'none' : ''
+}
+
+if (layoutSelect){
+  layoutSelect.addEventListener('change', ()=>{
+    // when a preset is chosen, reset custom inputs to match preset and hide them
+    const opt = layoutSelect.selectedOptions[0]
+    if (opt && opt.dataset && layoutSelect.value !== 'custom'){
+      if (colsInput) colsInput.value = opt.dataset.cols || ''
+      if (rowsInput) rowsInput.value = opt.dataset.rows || ''
+    }
+    updateLayoutVisibility()
+  })
+}
+
+if (colsInput) colsInput.addEventListener('input', ()=> updateLayoutVisibility())
+if (rowsInput) rowsInput.addEventListener('input', ()=> updateLayoutVisibility())
+
 // modal elements
 const editModal = document.getElementById('editModal')
 const modalLabelText = document.getElementById('modalLabelText')
@@ -43,22 +88,105 @@ let modalPositions = { text: null, imgs: [] }
 let labels = [] // each entry: { text, imgs:[], fontSize, imagePosition }
 const STORAGE_KEY = 'labelcreator.labels'
 
-function saveLabels(){
+// --- simple IndexedDB helper for storing image dataURLs ---
+function openDB(){
+  return new Promise((resolve, reject)=>{
+    const req = indexedDB.open('labelcreator', 1)
+    req.onupgradeneeded = (e)=>{
+      const db = e.target.result
+      if (!db.objectStoreNames.contains('images')) db.createObjectStore('images')
+    }
+    req.onsuccess = (e)=> resolve(e.target.result)
+    req.onerror = (e)=> reject(e.target.error)
+  })
+}
+
+function uuid(){
+  return 'img-' + ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c=>
+    (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+  )
+}
+
+async function storeImage(dataUrl){
+  const db = await openDB()
+  return await new Promise((res,rej)=>{
+    const tx = db.transaction('images','readwrite')
+    const store = tx.objectStore('images')
+    const key = uuid()
+    const req = store.put(dataUrl, key)
+    req.onsuccess = ()=> res(key)
+    req.onerror = ()=> rej(req.error)
+  })
+}
+
+async function getImage(key){
+  const db = await openDB()
+  return await new Promise((res,rej)=>{
+    const tx = db.transaction('images','readonly')
+    const store = tx.objectStore('images')
+    const req = store.get(key)
+    req.onsuccess = ()=> res(req.result)
+    req.onerror = ()=> rej(req.error)
+  })
+}
+
+async function deleteImage(key){
+  const db = await openDB()
+  return await new Promise((res,rej)=>{
+    const tx = db.transaction('images','readwrite')
+    const store = tx.objectStore('images')
+    const req = store.delete(key)
+    req.onsuccess = ()=> res()
+    req.onerror = ()=> rej(req.error)
+  })
+}
+
+// saveLabels now stores image dataURLs in IndexedDB and keeps metadata in localStorage
+async function saveLabels(){
   try{
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(labels))
+    const meta = []
+    for (const l of labels){
+      const entry = { text: l.text, fontSize: l.fontSize, imagePosition: l.imagePosition, positions: l.positions || null, imgs: [] }
+      if (l.imgs && l.imgs.length){
+        for (const im of l.imgs){
+          if (typeof im === 'string' && im.startsWith('data:')){
+            try{
+              const key = await storeImage(im)
+              entry.imgs.push(key)
+            }catch(e){ console.warn('storeImage failed', e) }
+          } else if (typeof im === 'string'){
+            entry.imgs.push(im)
+          }
+        }
+      }
+      meta.push(entry)
+    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(meta))
   }catch(e){
-    console.warn('saveLabels failed (possibly quota); retrying without images', e)
-    try{
-      const stripped = labels.map(l=>({ text: l.text, fontSize: l.fontSize, imagePosition: l.imagePosition, positions: l.positions || null, imgs: [] }))
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(stripped))
-    }catch(e2){ console.warn('saveLabels fallback failed', e2) }
+    console.warn('saveLabels failed', e)
   }
 }
 
-function loadLabels(){
+// loadLabels now restores metadata from localStorage and fetches images from IndexedDB
+async function loadLabels(){
   try{
     const s = localStorage.getItem(STORAGE_KEY)
-    if (s){ labels = JSON.parse(s) }
+    if (s){
+      const meta = JSON.parse(s)
+      labels = []
+      for (const m of meta){
+        const entry = { text: m.text, fontSize: m.fontSize, imagePosition: m.imagePosition, positions: m.positions || null, imgs: [] }
+        if (m.imgs && m.imgs.length){
+          for (const key of m.imgs){
+            try{
+              const data = await getImage(key)
+              if (data) entry.imgs.push(data)
+            }catch(e){ console.warn('getImage failed', e) }
+          }
+        }
+        labels.push(entry)
+      }
+    }
   }catch(e){ console.warn('loadLabels failed', e) }
   console.debug('loadLabels: restored', labels.length, 'labels')
   renderLabels()
@@ -669,5 +797,5 @@ if (clearAllBtn){
     sheet.innerHTML = ''
   })
 }
-// load labels from storage (falls back to empty and renders)
-loadLabels()
+// load labels from storage (falls back to empty and renders), then set layout visibility
+loadLabels().then(()=> updateLayoutVisibility()).catch(()=> updateLayoutVisibility())
