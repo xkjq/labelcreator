@@ -8,6 +8,7 @@
   --margin-left:10mm;
   --label-padding:2mm;
   --label-font-size:12pt;
+  --label-font-family: system-ui,Segoe UI,Arial,sans-serif;
 }
 body{font-family:system-ui,Segoe UI,Arial,sans-serif;padding:16px;color:#222;background:#f7f7f7}
 .app{max-width:1100px;margin:0 auto;background:#fff;padding:16px;border-radius:6px;box-shadow:0 2px 8px rgba(0,0,0,0.06)}
@@ -33,7 +34,7 @@ header h1{margin:0}
 }
 .label{border:1px solid #ddd;padding:var(--label-padding);box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center}
 .label-img{max-width:100%;max-height:60%;object-fit:contain}
-.label-text{margin-top:6px;font-weight:600;font-size:var(--label-font-size)}
+.label-text{margin-top:6px;font-weight:600;font-size:var(--label-font-size);font-family:var(--label-font-family)}
 .actions button{padding:8px 12px}
 .crossmark{pointer-events:none}
 
@@ -62,7 +63,7 @@ header h1{margin:0}
 .modal-preview .preview-text{position:absolute;cursor:grab;user-select:none;padding:2px 4px;text-align:center}
 /* Ensure modal preview uses same image/text sizing as the real labels */
 .modal-preview .label-img{max-width:100%;max-height:60%;object-fit:contain}
-.modal-preview .label-text{font-weight:600;font-size:var(--label-font-size);text-align:center}
+.modal-preview .label-text{font-weight:600;font-size:var(--label-font-size);text-align:center;font-family:var(--label-font-family)}
 
 @media print{
   html,body{margin:0;padding:0;background:#fff}

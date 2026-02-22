@@ -88,6 +88,17 @@
           <span id="fontSizeLabel">12pt</span>
         </label>
         <label>
+          Font:
+          <select id="fontSelect">
+            <option value="system-ui,Segoe UI,Arial,sans-serif">System</option>
+            <option value="Roboto,Arial,Helvetica,sans-serif">Roboto</option>
+            <option value="'Helvetica Neue',Helvetica,Arial,sans-serif">Helvetica</option>
+            <option value="Georgia,serif">Georgia</option>
+            <option value="'Times New Roman',Times,serif">Times</option>
+            <option value="'Courier New',Courier,monospace">Monospace</option>
+          </select>
+        </label>
+        <label>
           Image position:
           <select id="imagePosition">
             <option value="center" selected>Center</option>
@@ -142,6 +153,16 @@
           </label>
           <label>Font size:
             <input id="modalFontSize" type="number" min="6" max="48" value="12"> pt
+          </label>
+          <label>Font:
+            <select id="modalFontSelect">
+              <option value="system-ui,Segoe UI,Arial,sans-serif">System</option>
+              <option value="Roboto,Arial,Helvetica,sans-serif">Roboto</option>
+              <option value="'Helvetica Neue',Helvetica,Arial,sans-serif">Helvetica</option>
+              <option value="Georgia,serif">Georgia</option>
+              <option value="'Times New Roman',Times,serif">Times</option>
+              <option value="'Courier New',Courier,monospace">Monospace</option>
+            </select>
           </label>
           <label>Image position:
             <select id="modalImagePosition">

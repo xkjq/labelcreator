@@ -24,6 +24,31 @@ const labelHeightMode = document.getElementById('labelHeightMode')
 const labelHeightCustom = document.getElementById('labelHeightCustom')
 const fontSizeRange = document.getElementById('fontSizeRange')
 const fontSizeLabel = document.getElementById('fontSizeLabel')
+const fontSelect = document.getElementById('fontSelect')
+
+const FONT_KEY = 'labelcreator.fontFamily'
+
+function applyFontFamily(v){
+  if (!v) return
+  document.documentElement.style.setProperty('--label-font-family', v)
+}
+
+// restore font selection from storage (synchronous)
+try{
+  const savedFont = localStorage.getItem(FONT_KEY)
+  if (savedFont){
+    applyFontFamily(savedFont)
+    if (fontSelect) fontSelect.value = savedFont
+  }
+}catch(e){ console.warn('restore font failed', e) }
+
+if (fontSelect){
+  fontSelect.addEventListener('change', ()=>{
+    const v = fontSelect.value
+    applyFontFamily(v)
+    try{ localStorage.setItem(FONT_KEY, v) }catch(e){ console.warn('save font failed', e) }
+  })
+}
 
 // layout visibility toggles: hide preset when custom values are used, and vice-versa
 const layoutLabel = layoutSelect ? layoutSelect.closest('label') : null
@@ -74,6 +99,7 @@ if (rowsInput) rowsInput.addEventListener('input', ()=> updateLayoutVisibility()
 const editModal = document.getElementById('editModal')
 const modalLabelText = document.getElementById('modalLabelText')
 const modalFontSize = document.getElementById('modalFontSize')
+const modalFontSelect = document.getElementById('modalFontSelect')
 const modalImagePosition = document.getElementById('modalImagePosition')
 const modalImageInput = document.getElementById('modalImageInput')
 const modalImages = document.getElementById('modalImages')
@@ -146,7 +172,7 @@ async function saveLabels(){
   try{
     const meta = []
     for (const l of labels){
-      const entry = { text: l.text, fontSize: l.fontSize, imagePosition: l.imagePosition, positions: l.positions || null, imgs: [] }
+      const entry = { text: l.text, fontSize: l.fontSize, imagePosition: l.imagePosition, positions: l.positions || null, imgs: [], fontFamily: l.fontFamily || null }
       if (l.imgs && l.imgs.length){
         for (const im of l.imgs){
           if (typeof im === 'string' && im.startsWith('data:')){
@@ -184,7 +210,8 @@ async function loadLabels(){
             }catch(e){ console.warn('getImage failed', e) }
           }
         }
-        labels.push(entry)
+          entry.fontFamily = m.fontFamily || null
+          labels.push(entry)
       }
     }
   }catch(e){ console.warn('loadLabels failed', e) }
@@ -206,6 +233,7 @@ function renderLabels(){
     }
     const text = document.createElement('span')
     text.textContent = l.text || '(no text)'
+    if (l.fontFamily) text.style.fontFamily = l.fontFamily
     li.appendChild(text)
     const edit = document.createElement('button')
     edit.textContent = 'Edit'
@@ -240,10 +268,11 @@ addLabelBtn.addEventListener('click', ()=>{
   if (!text && !file) return alert('Add text or select an image')
   const defaultFont = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--label-font-size')) || 12
   const pos = imagePosition ? imagePosition.value : 'center'
+  const defaultFamily = (fontSelect && fontSelect.value) || getComputedStyle(document.documentElement).getPropertyValue('--label-font-family') || 'system-ui,Segoe UI,Arial,sans-serif'
   if (file){
     const r = new FileReader()
     r.onload = ()=>{
-      labels.push({ text, imgs:[r.result], fontSize: defaultFont, imagePosition: pos })
+      labels.push({ text, imgs:[r.result], fontSize: defaultFont, imagePosition: pos, fontFamily: defaultFamily })
       renderLabels()
       saveLabels()
       labelText.value = ''
@@ -251,7 +280,7 @@ addLabelBtn.addEventListener('click', ()=>{
     }
     r.readAsDataURL(file)
   } else {
-    labels.push({ text, imgs:[], fontSize: defaultFont, imagePosition: pos })
+    labels.push({ text, imgs:[], fontSize: defaultFont, imagePosition: pos, fontFamily: defaultFamily })
     renderLabels()
     saveLabels()
     labelText.value = ''
@@ -351,6 +380,7 @@ function generateSheet(){
     span.textContent = data.text || ''
     // apply per-label font size if defined, otherwise use root var
     if (data.fontSize) span.style.fontSize = `${data.fontSize}pt`
+    if (data.fontFamily) span.style.fontFamily = data.fontFamily
 
     // append images and text in an order that reflects the image position
     const isRow = item.style.flexDirection === 'row'
@@ -530,6 +560,9 @@ function openEditModal(index){
   modalLabelText.value = entry.text || ''
   modalFontSize.value = entry.fontSize || 12
   modalImagePosition.value = entry.imagePosition || 'center'
+  if (modalFontSelect){
+    modalFontSelect.value = entry.fontFamily || (fontSelect ? fontSelect.value : getComputedStyle(document.documentElement).getPropertyValue('--label-font-family'))
+  }
   modalImgs = Array.isArray(entry.imgs) ? entry.imgs.slice() : []
   // load saved manual positions if present
   modalPositions = { text: null, imgs: [] }
@@ -634,6 +667,11 @@ function renderModalPreview(){
   txt.className = 'label-text'
   txt.textContent = modalLabelText.value || ''
   txt.style.fontSize = (modalFontSize.value||12) + 'pt'
+  if (modalFontSelect && modalFontSelect.value){
+    txt.style.fontFamily = modalFontSelect.value
+  } else {
+    txt.style.fontFamily = getComputedStyle(document.documentElement).getPropertyValue('--label-font-family')
+  }
   // position text according to saved modalPositions or sensible defaults
   if (modalPositions.text && modalPositions.text.left!=null){
     txt.style.position = 'absolute'
@@ -725,6 +763,7 @@ modalSave.addEventListener('click', ()=>{
   entry.text = modalLabelText.value
   entry.imgs = modalImgs.slice()
   entry.fontSize = Number(modalFontSize.value) || 12
+  entry.fontFamily = modalFontSelect ? modalFontSelect.value : (fontSelect ? fontSelect.value : getComputedStyle(document.documentElement).getPropertyValue('--label-font-family'))
   entry.imagePosition = modalImagePosition.value || 'center'
   // store manual positions if enabled
   if (modalManualPosition && modalManualPosition.checked){
