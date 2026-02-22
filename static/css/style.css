@@ -33,6 +33,9 @@ header.level{align-items:flex-start;gap:12px;margin-bottom:18px;flex-wrap:wrap}
   header.level .level-right{align-self:flex-end;margin-top:8px}
   .controls{margin-top:6px}
 }
+
+/* make tabs clearly clickable */
+.tabs li{cursor:pointer}
 .controls{display:flex;gap:16px;flex-wrap:wrap;margin:12px 0}
 .controls label, .add-label, .actions{display:flex;align-items:center;gap:8px}
 .add-label input[type=file]{width:180px}

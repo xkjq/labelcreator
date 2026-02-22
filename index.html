@@ -28,11 +28,19 @@
       </header>
 
       <section class="controls">
-        <div style="width:100%;display:flex;gap:12px;align-items:center;margin-bottom:6px">
+        <div style="width:100%;margin-bottom:6px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
           <strong style="margin-right:6px">Mode:</strong>
-          <label style="display:flex;align-items:center;gap:6px"><input type="radio" name="mode" id="modeLabels" value="labels" checked> Create from labels</label>
-          <label style="display:flex;align-items:center;gap:6px"><input type="radio" name="mode" id="modeOptimize" value="optimize"> Optimize image layout</label>
+          <ul class="tabs is-toggle is-toggle-rounded" role="tablist" id="modeTabs" style="display:inline-flex;vertical-align:middle;margin:0">
+            <li class="is-active" data-mode="labels" role="tab" aria-selected="true"><a href="javascript:void(0)">Label generator</a></li>
+            <li data-mode="optimize" role="tab" aria-selected="false"><a href="javascript:void(0)">From Image</a></li>
+          </ul>
+          <!-- keep hidden radios for accessibility and backward compatibility with existing JS -->
+          <input type="radio" name="mode" id="modeLabels" value="labels" checked style="display:none">
+          <input type="radio" name="mode" id="modeOptimize" value="optimize" style="display:none">
         </div>
+
+        <!-- wrap all label-related controls so mode toggling can hide/show the whole area -->
+        <div id="labelsArea">
         <label class="label-mode">
           Preset layout:
           <select id="layoutSelect">
@@ -162,6 +170,7 @@
           <button id="generateBtn" class="button is-primary">Generate Sheet</button>
           <button id="printBtn" class="button is-light">Print</button>
           <button id="clearAllBtn" class="button is-danger">Clear all</button>
+        </div>
         </div>
       </section>
 

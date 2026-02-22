@@ -196,24 +196,56 @@ async function loadOptimize(){
 }
 function updateModeVisibility(){
   const useOptimize = (document.getElementById('modeOptimize') && document.getElementById('modeOptimize').checked)
-  const labelModeEls = document.querySelectorAll('.label-mode')
+  const labelsArea = document.getElementById('labelsArea')
+  const optSec = document.getElementById('optimizeSection')
   if (useOptimize){
-    // hide all label-mode controls when using Optimize
-    labelModeEls.forEach(e=>{ e.style.display = 'none' })
+    if (labelsArea) labelsArea.style.display = 'none'
+    if (optSec) optSec.style.display = ''
   } else {
-    // restore per-control visibility by re-applying page/layout settings
-    // this avoids overwriting visibility set by applyPageSettings() or updateLayoutVisibility()
+    if (labelsArea) labelsArea.style.display = ''
+    if (optSec) optSec.style.display = 'none'
+    // restore per-control visibility inside the labels area
     applyPageSettings()
     updateLayoutVisibility()
   }
-  const optSec = document.getElementById('optimizeSection')
-  if (optSec) optSec.style.display = useOptimize ? '' : 'none'
 }
 
 const modeLabels = document.getElementById('modeLabels')
 const modeOptimize = document.getElementById('modeOptimize')
 if (modeLabels) modeLabels.addEventListener('change', updateModeVisibility)
 if (modeOptimize) modeOptimize.addEventListener('change', updateModeVisibility)
+
+// Bulma tabs for mode selection (keeps hidden radios in sync)
+const modeTabs = document.getElementById('modeTabs')
+if (modeTabs){
+  const setActiveTab = (mode)=>{
+    modeTabs.querySelectorAll('li[data-mode]').forEach(t=>{
+      if (t.dataset.mode === mode){
+        t.classList.add('is-active')
+        t.setAttribute('aria-selected','true')
+      } else {
+        t.classList.remove('is-active')
+        t.setAttribute('aria-selected','false')
+      }
+    })
+  }
+  // delegated click handler so clicks on the inner <a> are handled properly
+  modeTabs.addEventListener('click', (e)=>{
+    const li = e.target.closest && e.target.closest('li[data-mode]')
+    if (!li) return
+    const mode = li.dataset.mode
+    setActiveTab(mode)
+    if (mode === 'optimize'){
+      if (modeOptimize) modeOptimize.checked = true
+    } else {
+      if (modeLabels) modeLabels.checked = true
+    }
+    updateModeVisibility()
+  })
+  // initialize tabs from radios
+  if (modeOptimize && modeOptimize.checked) setActiveTab('optimize')
+  else setActiveTab('labels')
+}
 
 // Theme toggle
 const themeToggle = document.getElementById('themeToggle')
