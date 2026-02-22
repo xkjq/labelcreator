@@ -132,12 +132,63 @@ if (optimizeImageInput){
       const img = new Image()
       img.onload = ()=>{ optimizeAspect = img.height / img.width }
       img.src = optimizeImageData
+      // persist the selected image and settings
+      saveOptimize().catch(e=>console.warn('saveOptimize failed', e))
     }
     r.readAsDataURL(f)
   })
 }
-
+ 
 // Mode switching: show/hide controls depending on selected generation mode
+
+let optimizeImageKey = null
+const OPT_KEY = 'labelcreator.optimize'
+
+async function saveOptimize(){
+  try{
+    const meta = { targetWidth: Number(optimizeScale ? optimizeScale.value : 50) || 50, gap: Number(optimizeGap ? optimizeGap.value : 6) || 6, imageKey: null }
+    // store image data in IndexedDB and keep key
+    if (optimizeImageData){
+      try{
+        const key = await storeImage(optimizeImageData)
+        // delete previous key if different
+        if (optimizeImageKey && optimizeImageKey !== key){
+          try{ await deleteImage(optimizeImageKey) }catch(e){/* ignore */}
+        }
+        optimizeImageKey = key
+        meta.imageKey = key
+      }catch(e){ console.warn('saveOptimize: storeImage failed', e) }
+    } else if (optimizeImageKey){
+      meta.imageKey = optimizeImageKey
+    }
+    try{ localStorage.setItem(OPT_KEY, JSON.stringify(meta)) }catch(e){ console.warn('saveOptimize: localStorage failed', e) }
+  }catch(e){ console.warn('saveOptimize failed', e) }
+}
+
+async function loadOptimize(){
+  try{
+    const s = localStorage.getItem(OPT_KEY)
+    if (!s) return
+    const meta = JSON.parse(s)
+    if (!meta) return
+    if (typeof meta.targetWidth !== 'undefined' && optimizeScale) optimizeScale.value = meta.targetWidth
+    if (optimizeScaleLabel) optimizeScaleLabel.textContent = (Number(optimizeScale.value)||50) + ' mm'
+    if (typeof meta.gap !== 'undefined' && optimizeGap) optimizeGap.value = meta.gap
+    if (meta.imageKey){
+      try{
+        const data = await getImage(meta.imageKey)
+        if (data){
+          optimizeImageData = data
+          optimizeImageKey = meta.imageKey
+          if (optimizePreview) optimizePreview.src = optimizeImageData
+          const img = new Image()
+          img.onload = ()=>{ optimizeAspect = img.height / img.width }
+          img.src = optimizeImageData
+        }
+      }catch(e){ console.warn('loadOptimize: getImage failed', e) }
+    }
+  }catch(e){ console.warn('loadOptimize failed', e) }
+}
 function updateModeVisibility(){
   const useOptimize = (document.getElementById('modeOptimize') && document.getElementById('modeOptimize').checked)
   document.querySelectorAll('.label-mode').forEach(e=>{
@@ -992,4 +1043,4 @@ if (clearAllBtn){
   })
 }
 // load labels from storage (falls back to empty and renders), then set layout visibility
-loadLabels().then(()=> { updateLayoutVisibility(); updateModeVisibility() }).catch(()=> { updateLayoutVisibility(); updateModeVisibility() })
+Promise.all([loadLabels(), loadOptimize()]).then(()=> { updateLayoutVisibility(); updateModeVisibility() }).catch(()=> { updateLayoutVisibility(); updateModeVisibility() })
