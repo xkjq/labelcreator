@@ -8,7 +8,6 @@ const colsInput = document.getElementById('colsInput')
 const rowsInput = document.getElementById('rowsInput')
 const generateBtn = document.getElementById('generateBtn')
 const printBtn = document.getElementById('printBtn')
-const diagBtn = document.getElementById('diagBtn')
 const clearAllBtn = document.getElementById('clearAllBtn')
 const sheet = document.getElementById('sheet')
 const pageSize = document.getElementById('pageSize')
@@ -644,32 +643,7 @@ function computeDefaultPositions(imagePos, count){
   return { text: txtPos, imgs }
 }
 printBtn.addEventListener('click', ()=>{ if (!sheet.children.length) generateSheet(); window.print() })
-if (diagBtn){
-  diagBtn.addEventListener('click', ()=>{
-    console.log('--- Label Creator Diagnostics ---')
-    const modalBox = document.querySelector('#modalPreview .modal-preview-inner')
-    if (modalBox){
-      console.log('Modal preview box rect:', modalBox.getBoundingClientRect())
-      console.log('Modal preview inline size:', modalBox.style.width, modalBox.style.height)
-    } else {
-      console.log('Modal preview box not present (open the edit modal to show it)')
-    }
-    const firstLabel = sheet.querySelector('.label')
-    if (firstLabel){
-      console.log('First generated label rect:', firstLabel.getBoundingClientRect())
-      console.log('First generated label inline size:', firstLabel.style.width, firstLabel.style.height)
-    } else {
-      console.log('No generated labels in sheet')
-    }
-    const box = modalBox || firstLabel
-    if (box){
-      const imgs = box.querySelectorAll('.label-img')
-      imgs.forEach((im,i)=>{
-        console.log(`img[${i}] natural: ${im.naturalWidth}x${im.naturalHeight}; style.maxHeight: ${im.style.maxHeight}; boundingRect:`, im.getBoundingClientRect())
-      })
-    }
-  })
-}
+// diagnostics button removed
 
 // Clear all labels handler
 if (clearAllBtn){
