@@ -1,38 +1,55 @@
-# Label Creator
+# Label Creator 🚀
 
-A small client-side app for composing and printing label sheets from text and images.
+A lightweight client-side app for composing and printing label sheets from text and images. Works entirely in the browser — no server required.
+
+Try it out: https://xkjq.github.io/labelcreator/ 🌐
+
+Contents
+- Features
+- Quick start
+- Usage
+- Developer notes
+- Contributing
+- License
 
 Features
-- Generate printable label sheets using preset or custom layouts (columns × rows).
-- Custom margins and label heights, with inline controls that appear to the right when space allows.
-- Per-label images and text, manual positioning via the edit modal.
-- Ordering modes: Sequential (interleaved), Grouped, and Random.
-- An "Optimize" mode to tile a single image across a page.
+- Generate printable label sheets from presets or fully custom layouts (columns × rows).
+- Per-label images and text with an edit modal for manual positioning.
+- Custom controls for margins and label height; responsive layout keeps controls accessible.
+- Label ordering modes: Sequential (interleaved), Grouped, Random.
+- Optimize mode to tile a single image across a page.
 
 Quick start
 
-1. Open the project folder and start a simple static server (Python 3):
+Online
+- Use it now on github pages: https://xkjq.github.io/labelcreator/
+
+Offline (local)
+1. Clone or download the repository and open the project folder.
+2. Serve the folder locally (Python 3 built-in server):
 
 ```bash
 cd /path/to/labelcreator
 python3 -m http.server 8000
 ```
 
-2. Open your browser at http://localhost:8000 and load `index.html`.
+3. Open http://localhost:8000 in your browser and open [index.html](index.html).
 
-How to use
-- Select "Label generator" mode and choose a preset layout or `Custom` to show inline custom controls.
-- Add labels using the input and optional image upload, edit labels to position images/text.
-- Choose the label ordering mode before clicking "Generate Sheet".
-- Use "Print" to print the generated sheet (print CSS preserves physical sizes).
+Usage
+- Mode: choose "Label generator" or "From Image (Optimize)".
+- Layout: pick a preset or `Custom` to set columns/rows.
+- Margins: choose a preset or `Custom` to enter top/right/bottom/left values.
+- Label height: `Standard`, `Thin`, or `Custom (mm)`.
+- Add labels with text and optional image; use the edit modal to adjust position and styles.
+- Generate Sheet builds the printable page; use the browser Print dialog to print (print CSS preserves physical sizes).
 
-Files
-- `index.html` — main UI and markup.
-- `static/css/style.css` — styles and responsive layout rules.
-- `static/js/app.js` — app logic: presets, generation, storage, and modal editing.
+Developer notes
+- Key files:
+  - [index.html](index.html) — UI and markup
+  - [static/css/style.css](static/css/style.css) — styles and responsive rules
+  - [static/js/app.js](static/js/app.js) — application logic, presets, generation, storage, and modal editing
+- Data storage: images are stored in IndexedDB; metadata is saved in `localStorage`.
+- To preview changes while developing, run the local server shown above and refresh your browser.
 
-Development notes
-- The app stores images in IndexedDB and metadata in `localStorage`.
-- To preview changes quickly, run the static server above and refresh the browser.
-
-If you'd like, I can add a small preview screenshot, enhance the development workflow, or wire up automated tests.
+Contributing
+- Suggestions, bug reports, and pull requests are welcome. Please open an issue or a PR against the `main` branch.
