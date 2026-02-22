@@ -12,6 +12,15 @@
 }
 body{font-family:system-ui,Segoe UI,Arial,sans-serif;padding:16px;color:#222;background:#f7f7f7}
 .app{max-width:1100px;margin:0 auto;background:#fff;padding:16px;border-radius:6px;box-shadow:0 2px 8px rgba(0,0,0,0.06)}
+
+/* Dark mode */
+html[data-theme="dark"]{
+  background:#0f1720;
+}
+html[data-theme="dark"] body{ background:#0b1220; color:#e6eef8 }
+html[data-theme="dark"] .app{ background:#071226; box-shadow:none }
+html[data-theme="dark"] .box{ background:#071226; border-color:#173146 }
+html[data-theme="dark"] .label-item{ color:#e6eef8 }
 header h1{margin:0}
 .controls{display:flex;gap:16px;flex-wrap:wrap;margin:12px 0}
 .controls label, .add-label, .actions{display:flex;align-items:center;gap:8px}

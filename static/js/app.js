@@ -204,6 +204,26 @@ const modeOptimize = document.getElementById('modeOptimize')
 if (modeLabels) modeLabels.addEventListener('change', updateModeVisibility)
 if (modeOptimize) modeOptimize.addEventListener('change', updateModeVisibility)
 
+// Theme toggle
+const themeToggle = document.getElementById('themeToggle')
+const THEME_KEY = 'labelcreator.theme'
+function applyTheme(t){
+  if (t === 'dark') document.documentElement.setAttribute('data-theme','dark')
+  else document.documentElement.removeAttribute('data-theme')
+}
+try{
+  const saved = localStorage.getItem(THEME_KEY)
+  if (saved) applyTheme(saved)
+}catch(e){}
+if (themeToggle){
+  themeToggle.addEventListener('click', ()=>{
+    const current = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light'
+    const next = current === 'dark' ? 'light' : 'dark'
+    applyTheme(next)
+    try{ localStorage.setItem(THEME_KEY, next) }catch(e){}
+  })
+}
+
 function analyzeLayout(targetWidthMm){
   // returns {cols, rows, tileW, tileH, count}
   const root = getComputedStyle(document.documentElement)
@@ -727,11 +747,7 @@ function applyPageSettings(){
 }
 
 // sync layout select -> cols/rows inputs
-layoutSelect.addEventListener('change', ()=>{
-  const opt = layoutSelect.selectedOptions[0]
-  colsInput.value = opt.dataset.cols || colsInput.value
-  rowsInput.value = opt.dataset.rows || rowsInput.value
-})
+// (handled above in the primary change listener; duplicate handler removed)
 
 labelHeightMode.addEventListener('change', ()=>{
   if (labelHeightMode.value === 'custom') labelHeightCustom.style.display = 'inline-block'

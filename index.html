@@ -4,13 +4,27 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Label Creator (Browser-only)</title>
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
     <link rel="stylesheet" href="./static/css/style.css">
   </head>
   <body>
     <div class="app">
-      <header>
-        <h1>Label Creator</h1>
-        <p>Create printable label sheets in your browser (no server required).</p>
+      <header class="level">
+        <div class="level-left">
+          <div class="level-item">
+            <div>
+              <h1 class="title">Label Creator</h1>
+              <p class="subtitle">Create printable label sheets in your browser (no server required).</p>
+            </div>
+          </div>
+        </div>
+        <div class="level-right">
+          <div class="level-item">
+            <div class="buttons">
+              <button id="themeToggle" class="button is-light">Toggle theme</button>
+            </div>
+          </div>
+        </div>
       </header>
 
       <section class="controls">
@@ -123,20 +137,31 @@
           </div>
         </div>
 
-        <div class="add-label label-mode">
-          <input id="labelText" placeholder="Child name or label text">
-          <input id="labelImage" type="file" accept="image/*">
-          <button id="addLabelBtn">Add Label</button>
+        <div class="add-label label-mode field has-addons">
+          <div class="control is-expanded">
+            <input id="labelText" class="input" placeholder="Child name or label text">
+          </div>
+          <div class="control">
+            <div class="file">
+              <label class="file-label">
+                <input id="labelImage" class="file-input" type="file" accept="image/*">
+                <span class="file-cta"><span class="file-label">Choose</span></span>
+              </label>
+            </div>
+          </div>
+          <div class="control">
+            <button id="addLabelBtn" class="button is-primary">Add Label</button>
+          </div>
         </div>
 
-        <div class="label-list label-mode">
-          <h3>Labels</h3>
+        <div class="label-list label-mode box">
+          <h3 class="title is-6">Labels</h3>
           <ul id="labels"></ul>
         </div>
-        <div class="actions label-mode">
-          <button id="generateBtn">Generate Sheet</button>
-          <button id="printBtn">Print</button>
-          <button id="clearAllBtn">Clear all</button>
+        <div class="actions label-mode buttons">
+          <button id="generateBtn" class="button is-primary">Generate Sheet</button>
+          <button id="printBtn" class="button is-light">Print</button>
+          <button id="clearAllBtn" class="button is-danger">Clear all</button>
         </div>
       </section>
 
@@ -161,10 +186,10 @@
           <input id="optimizeGap" type="number" min="0" max="50" value="6" style="width:80px"> 
         </label>
         <div style="display:flex;gap:8px;align-items:center">
-          <button id="optimizeAnalyzeBtn">Analyze</button>
-          <button id="optimizeAutoBtn">Auto optimize</button>
-          <button id="optimizeGenerateBtn">Generate optimized sheet</button>
-          <button id="optimizePrintBtn">Print</button>
+          <button id="optimizeAnalyzeBtn" class="button is-info">Analyze</button>
+          <button id="optimizeAutoBtn" class="button">Auto optimize</button>
+          <button id="optimizeGenerateBtn" class="button is-primary">Generate optimized sheet</button>
+          <button id="optimizePrintBtn" class="button is-light">Print</button>
         </div>
         <div id="optimizeInfo" style="margin-top:8px;color:#333"></div>
       </section>
