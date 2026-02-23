@@ -19,14 +19,14 @@ Features
 - Label ordering modes: Sequential (interleaved), Grouped, Random.
 - Optimize mode to tile a single image across a page.
 
-Quick start
+## Quick start
 
 Online
 - Use it now on github pages: https://xkjq.github.io/labelcreator/
 
 Offline (local)
 1. Clone or download the repository and open the project folder.
-2. Serve the folder locally (Python 3 built-in server):
+2. Serve the folder locally (for example with Python 3 built-in server):
 
 ```bash
 cd /path/to/labelcreator
@@ -35,7 +35,7 @@ python3 -m http.server 8000
 
 3. Open http://localhost:8000 in your browser and open [index.html](index.html).
 
-Usage
+## Usage
 - Mode: choose "Label generator" or "From Image (Optimize)".
 - Layout: pick a preset or `Custom` to set columns/rows.
 - Margins: choose a preset or `Custom` to enter top/right/bottom/left values.
@@ -43,7 +43,7 @@ Usage
 - Add labels with text and optional image; use the edit modal to adjust position and styles.
 - Generate Sheet builds the printable page; use the browser Print dialog to print (print CSS preserves physical sizes).
 
-Developer notes
+## Developer notes
 - Key files:
   - [index.html](index.html) — UI and markup
   - [static/css/style.css](static/css/style.css) — styles and responsive rules
@@ -53,3 +53,6 @@ Developer notes
 
 Contributing
 - Suggestions, bug reports, and pull requests are welcome. Please open an issue or a PR against the `main` branch.
+
+## License
+MIT License
